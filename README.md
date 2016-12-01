@@ -8,7 +8,7 @@ Library for exporting SVG content from the DOM.
 - [png](#png)
 
 
-## png
+### png
 ```
 dl.png(svg, filename, options)
 ```
