@@ -1,8 +1,10 @@
-# description
+# Description
 Library for exporting SVG content from the DOM.
 
-# requirements
+
+# Requirements
 `d3`
+
 
 # API reference
 - [png](#png)
@@ -26,9 +28,14 @@ argument | description
 ```
 dl.eps(svg, filename)
 ```
-Exports a specific SVG content as an EPS image. Beta, converts the following elements only*: `line`, `circle`. Note that opacity is ignored during conversion.
+Exports a specific SVG content as an EPS image. Supported shapes: `line`, `circle`. Note that opacity is ignored during conversion.
 
 argument | description
 --- | ---
 `svg` | Selector for the SVG element to export, either the SVG element itself, its ID or class.
 `filename` | Name of the exported EPS.
+
+
+# TODO
+- missing shapes, text for EPS
+- full styling in EPS
