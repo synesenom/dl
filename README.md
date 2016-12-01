@@ -12,7 +12,7 @@ Library for exporting SVG content from the DOM.
 ```
 dl.png(svg, filename, options)
 ```
-Exports a designated SVG as a PNG image.
+Exports a specific SVG content as a PNG image.
 
 argument | description
 --- | ---
