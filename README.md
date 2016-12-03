@@ -28,7 +28,7 @@ argument | description
 ```
 dl.eps(svg, filename)
 ```
-Exports a specific SVG content as an EPS image. Supported shapes: `line`, `circle`. Note that opacity is ignored during conversion.
+Exports a specific SVG content as an EPS image. Supported shapes: `line`, `circle`. Note that opacity is converted to blending with white color, but no real transparency is implemented.
 
 argument | description
 --- | ---
