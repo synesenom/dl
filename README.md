@@ -9,6 +9,7 @@ Library for exporting SVG content from the DOM.
 # API reference
 - [png](#png)
 - [eps](#eps)
+- [graph](#graph)
 
 
 ## png
@@ -36,6 +37,19 @@ argument | description
 `filename` | Name of the exported EPS.
 
 
+## graph
+```
+dl.graph(svg, filename)
+```
+Exports the specified SVG content to a graph JSON file. The SVG content is expected to be a network drawn with d3, that is, only `circle` and `line` elements are exported.
+
+argument | description
+--- | ---
+`svg` | Selector for the SVG element to export, either the SVG itself, its ID or class.
+`filename` | Name of the exported JSON.
+
+
 # TODO
-- missing shapes, text for EPS
-- full styling in EPS
+- eps: implement missing shapes, text
+- eps: full styling in EPS
+- graph: detect link source/target from coordinates
