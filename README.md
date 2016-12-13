@@ -52,4 +52,3 @@ argument | description
 # TODO
 - eps: implement missing shapes, text
 - eps: full styling in EPS
-- graph: detect link source/target from coordinates
