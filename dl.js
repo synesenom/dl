@@ -294,6 +294,7 @@ var dl = {
 			var c = d3.select(circle);
 			g.nodes.push({
 				id: +c.attr("id"),
+				r: +c.attr("r"),
 				x: +c.attr("cx"),
 				y: +c.attr("cy")
 			});
@@ -301,6 +302,7 @@ var dl = {
 		svgElem.selectAll("line").nodes(0).forEach(function(line) {
 			var l = d3.select(line);
 			g.links.push({
+				value: +l.attr("stroke-width"),
 				x1: +l.attr("x1"),
 				y1: +l.attr("y1"),
 				x2: +l.attr("x2"),
