@@ -184,7 +184,7 @@ var dl = {
 			var newurl = DOMURL.createObjectURL(blob);
 
 			// Create link with the image and trigger the click right away
-			this._trigger(canvasData, filename);
+			dl._trigger(canvasData, filename);
 
 			// Clean up DOM
 			dl._clean();
@@ -281,12 +281,13 @@ var dl = {
 	},
 
 	/**
-	 * Converts an SVG element containing a graph into a JSON file.
+	 * Converts an SVG element to a JSON file.
+	 * Only works for graphs.
 	 *
 	 * @param {string} selector Selector for the SVG element to convert.
 	 * @param {string} filename Name of the file to download.
 	 */
-	graph: function(selector, filename) {
+	json: function(selector, filename) {
 		// Get coordinates
 		var svgElem = d3.select(selector);
 		var g = {nodes: [], links: []};
@@ -310,12 +311,12 @@ var dl = {
 			});
 		});
 
+		// Find source/target ids
 		function r(x1, y1, x2, y2) {
 			var dx = x1 - x2;
 			var dy = y1 - y2;
 			return dx*dx + dy*dy;
 		}
-
 		function find(link, dir) {
 			var x = dir == "source" ? link.x1 : link.x2;
 			var y = dir == "source" ? link.y1 : link.y2;
@@ -329,12 +330,69 @@ var dl = {
 			}
 			return m.id;
 		}
-
 		g.links.forEach(function(link) {
 			link.source = find(link, "source");
 			link.target = find(link, "target");
 		});
 		var data = "data:text/json; charset=utf-8," + encodeURIComponent(JSON.stringify(g, null, 2));
 		this._trigger(data, filename);
+	},
+
+	/**
+	 * Converts an SVG element to a TeX file.
+	 * Only works for graphs.
+	 *
+	 * @param {string} selector Selector for the SVG element to convert.
+	 * @param {string} filename Name of the file to download.
+	 */
+	tex: function(selector, filename) {
+		// Get coordinates
+		var svgElem = d3.select(selector);
+		var g = {nodes: [], links: []};
+		svgElem.selectAll("circle").nodes(0).forEach(function(circle) {
+			var c = d3.select(circle);
+			g.nodes.push({
+				id: +c.attr("id"),
+				r: +c.attr("r"),
+				x: +c.attr("cx"),
+				y: +c.attr("cy")
+			});
+		});
+		svgElem.selectAll("line").nodes(0).forEach(function(line) {
+			var l = d3.select(line);
+			g.links.push({
+				value: +l.attr("stroke-width"),
+				x1: +l.attr("x1"),
+				y1: +l.attr("y1"),
+				x2: +l.attr("x2"),
+				y2: +l.attr("y2")
+			});
+		});
+		// Find source/target ids
+		function r(x1, y1, x2, y2) {
+			var dx = x1 - x2;
+			var dy = y1 - y2;
+			return dx*dx + dy*dy;
+		}
+		function find(link, dir) {
+			var x = dir == "source" ? link.x1 : link.x2;
+			var y = dir == "source" ? link.y1 : link.y2;
+			var n = g.nodes[0];
+			var m = {r: r(n.x, n.y, x, y), id: n.id};
+			for (var i=1; i<g.nodes.length; i++) {
+				n = g.nodes[i];
+				var r1 = r(n.x, n.y, x, y);
+				if (r1 < m.r)
+					m = {r: r1, id: n.id};
+			}
+			return m.id;
+		}
+		g.links.forEach(function(link) {
+			link.source = find(link, "source");
+			link.target = find(link, "target");
+		});
+
+		// Make minimal working TeX
+		
 	}
 };
