@@ -43,7 +43,7 @@ Transparency is not supported, only alpha-blending with background.
 | `filename` | Name of the exported EPS. |
 
 
-## JSON
+## json
 ```
 dl.json(svg, filename)
 ```

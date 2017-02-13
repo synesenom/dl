@@ -1,5 +1,6 @@
 /**
  * An EPS generator class.
+ * @todo make global container of all elements and put them in the right order.
  */
 function EPS(boundingBox) {
     // A list of keywords
@@ -13,7 +14,8 @@ function EPS(boundingBox) {
         c: " setrgbcolor ",
         f: " fill ",
         s: " stroke ",
-        a: " arc "
+        a: " arc ",
+        cp: " closepath "
     };
 
     /**
@@ -30,7 +32,9 @@ function EPS(boundingBox) {
         style: {},
         elems: {
             lines: [],
-            circles: []
+            circles: [],
+            polygons: [],
+            paths: []
         },
         footer: "\n%%EOF"
     };
@@ -70,15 +74,15 @@ function EPS(boundingBox) {
      *
      * @param {object} src Source position, must have x and y keys.
      * @param {object} dst Destination position, must have x and y keys.
-     * @param {object} color Color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
      * @param {number} width Width of the line.
      * @returns {EPS} This EPS object.
      */
-    this.line = function(src, dst, color, width) {
+    this.line = function(src, dst, stroke, width) {
         this._doc.elems.lines.push({
             src: src,
             dst: dst,
-            color: color,
+            stroke: stroke,
             width: width
         });
         return this;
@@ -89,20 +93,58 @@ function EPS(boundingBox) {
      *
      * @param {object} pos Position, must have x and y keys.
      * @param {number} radius Radius.
-     * @param {object} color Color, must have r, g and b keys, all values are between 0 and 1.
-     * @param {object} stroke Color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {object} fill Fill color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
      * @param {number} strokeWidth Width of the stroke around the circle.
      * @returns {EPS} This EPS object.
      */
-    this.circle = function(pos, radius, color, stroke, strokeWidth) {
+    this.circle = function(pos, radius, fill, stroke, strokeWidth) {
         this._doc.elems.circles.push({
             pos: pos,
             radius: radius,
-            color: color,
+            fill: fill,
             stroke: stroke,
             strokeWidth: strokeWidth
         });
         return this;
+    };
+
+    /**
+     * Draws a polygon.
+     *
+     * @param {Array} corners Coordinates of the corners, elements must have x and y keys.
+     * @param {object} fill Fill color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {number} strokeWidth Width of the stroke around the polygon.
+     * @returns {EPS} This EPS object.
+     */
+    this.polygon = function(corners, fill, stroke, strokeWidth) {
+        this._doc.elems.polygons.push({
+            corners: corners,
+            fill: fill,
+            stroke: stroke,
+            strokeWidth: strokeWidth
+        });
+        return this;
+    };
+
+    /**
+     * Draws a path.
+     *
+     * @todo implement filled path
+     * @param {Array} segments Coordinates of the segments, elements must have x and y keys.
+     * @param {object} fill Fill color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
+     * @param {number} strokeWidth Width of the path stroke.
+     * @returns {EPS} This EPS object.
+     */
+    this.path = function(segments, fill, stroke, strokeWidth) {
+        this._doc.elems.paths.push({
+            segments: segments,
+            fill: fill,
+            stroke: stroke,
+            strokeWidth: strokeWidth
+        });
     };
 
     /**
@@ -125,21 +167,48 @@ function EPS(boundingBox) {
         _doc += "\n";*/
 
         // Elements
+        doc += "\n% Lines\n%\n";
         this._doc.elems.lines.forEach(function(l) {
             doc += kw.gs + kw.np;
-            doc += l.color.r + " " + l.color.g + " " + + l.color.b + kw.c;
+            doc += l.stroke.r + " " + l.stroke.g + " " + + l.stroke.b + kw.c;
             doc += l.width + kw.lw;
             doc += l.src.x + " " + l.src.y + kw.mt + l.dst.x + " " + l.dst.y + kw.lt + kw.s;
             doc += kw.gr + "\n";
         });
+        doc += "\n% Circles\n%\n";
         this._doc.elems.circles.forEach(function(c) {
             doc += kw.gs + kw.np;
-            doc += c.color.r + " " + c.color.g + " " + + c.color.b + kw.c;
+            doc += c.fill.r + " " + c.fill.g + " " + + c.fill.b + kw.c;
             doc += c.pos.x + " " + c.pos.y + " " + c.radius + " 0 360" + kw.a;
             doc += kw.gs + kw.f + kw.gr;
             doc += c.stroke.r + " " + c.stroke.g + " " + + c.stroke.b + kw.c;
             doc += c.strokeWidth + kw.lw + kw.s;
             doc += kw.gr + "\n";
+        });
+        doc += "\n% Polygons\n%\n";
+        this._doc.elems.polygons.forEach(function(p) {
+            doc += kw.gs + kw.np;
+            doc += p.fill.r + " " + p.fill.g + " " + + p.fill.b + kw.c;
+            doc += p.corners[0].x + " " + p.corners[0].y + kw.mt;
+            for (var i=1; i<p.corners.length; i++) {
+                doc += p.corners[i].x + " " + p.corners[i].y + kw.lt;
+            }
+            doc += kw.cp;
+            doc += kw.gs + kw.f + kw.gr;
+            doc += p.stroke.r + " " + p.stroke.g + " " + + p.stroke.b + kw.c;
+            doc += p.strokeWidth + kw.lw + kw.s;
+            doc += kw.gr + "\n";
+        });
+        doc += "\n% Paths\n%\n";
+        this._doc.elems.paths.forEach(function(p) {
+            doc += kw.gs + kw.np;
+            doc += p.stroke.r + " " + p.stroke.g + " " + + p.stroke.b + kw.c;
+            doc += p.strokeWidth + kw.lw + kw.f;
+            doc += p.segments[0].x + " " + p.segments[0].y + kw.mt;
+            for (var i=1; i<p.segments.length; i++) {
+                doc += p.segments[i].x + " " + p.segments[i].y + kw.lt;
+            }
+            doc += kw.s + kw.gr + "\n";
         });
 
         // Footer
