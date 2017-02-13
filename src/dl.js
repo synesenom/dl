@@ -81,7 +81,7 @@ const dl = {
 
     /**
      * Returns the color from a style attribute of an element.
-     * Color must be given by rgb(...) format.
+     * Color must be given author rgb(...) format.
      *
      * @param {string} color Style describing the color to parse.
      * @param {number} opacity Optional opacity value to mix with the color.
@@ -93,7 +93,11 @@ const dl = {
 
         // Empty color: white
         if (color === null || color == "" || color == "none") {
-            // Do nothing
+            return {
+                rgbInt: null,
+                rgbFloat: null,
+                rgbHex: null
+            };
         } else if (color[0] == "#") {
             if (color.length == 4) {
                 c = {
@@ -242,7 +246,6 @@ const dl = {
                 });
                 break;
         }
-        console.log(elements);
         return elements;
     },
 
@@ -345,9 +348,9 @@ const dl = {
 
         // Build document
         var eps = new EPS({width: w, height: h})
-            .by("dl version 0.1");
+            .author("dl version 0.1");
         if (meta != null && meta != "")
-            eps.by(meta);
+            eps.author(meta);
         this._getElements(selector, "line").forEach(function(l) {
             eps.line(
                 {x: l.x1, y: l.y1},
@@ -356,6 +359,7 @@ const dl = {
                 l.strokeWidth
             );
         });
+        // TODO error with stroke color
         this._getElements(selector, "circle").forEach(function(n) {
             eps.circle(
                 {x: n.x, y: n.y},
@@ -365,7 +369,7 @@ const dl = {
                 n.strokeWidth
             );
         });
-        this._getElements(selector, "rect").forEach(function(r) {
+        /*this._getElements(selector, "rect").forEach(function(r) {
             eps.polygon(
                 [{x: r.x, y: r.y},
                     {x: r.x + r.width, y: r.y},
@@ -383,7 +387,7 @@ const dl = {
                 p.stroke,
                 p.strokeWidth
             );
-        });
+        });*/
 
         // Write it
         var data = "data:text/EPS; charset=utf-8," + encodeURIComponent(eps.make());
