@@ -39,24 +39,24 @@ EPS.prototype._drawLine = function (line) {
 
 EPS.prototype._drawCircle = function(circle) {
     var kw = EPS.prototype.kw;
-    var geometric = circle.pos.x + " " + circle.pos.y + " " + circle.radius + " 0 360" + kw.a;
+    var geometry = circle.pos.x + " " + circle.pos.y + " " + circle.radius + " 0 360" + kw.a;
 
     var res = kw.gs + kw.np;
     // Fill only
     if (circle.stroke == null) {
         res += circle.fill.r + " " + circle.fill.g + " " + circle.fill.b + kw.c;
-        res += geometric;
+        res += geometry;
         res += kw.cp + kw.f;
     } else if (circle.fill == null) {
         // Stroke only
         res += circle.stroke.r + " " + circle.stroke.g + " " + circle.stroke.b + kw.c;
         res += circle.strokeWidth + kw.lw;
-        res += geometric;
+        res += geometry;
         res += kw.cp + kw.s;
     } else {
         // Fill + stroke
         res += circle.fill.r + " " + circle.fill.g + " " + circle.fill.b + kw.c;
-        res += geometric;
+        res += geometry;
         res += kw.cp;
         res += kw.gs + kw.f + kw.gr;
         res += circle.stroke.r + " " + circle.stroke.g + " " + circle.stroke.b + kw.c;
@@ -70,24 +70,24 @@ EPS.prototype._drawPolygon = function(polygon) {
     var kw = EPS.prototype.kw;
 
     var res = kw.gs + kw.np;
-    var geometric = polygon.corners[0].x + " " + polygon.corners[0].y + kw.mt;
+    var geometry = polygon.corners[0].x + " " + polygon.corners[0].y + kw.mt;
     for (var i = 1; i < polygon.corners.length; i++) {
-        geometric += polygon.corners[i].x + " " + polygon.corners[i].y + kw.lt;
+        geometry += polygon.corners[i].x + " " + polygon.corners[i].y + kw.lt;
     }
     // Fill only
     if (polygon.stroke == null) {
         res += polygon.fill.r + " " + polygon.fill.g + " " + polygon.fill.b + kw.c;
-        res += geometric;
+        res += geometry;
         res += kw.cp + kw.f;
     } else if (polygon.fill == null) {
         // Stroke only
         res += polygon.stroke.r + " " + polygon.stroke.g + " " + polygon.stroke.b + kw.c;
-        res += geometric;
+        res += geometry;
         res += kw.cp + kw.s;
     } else {
         // FIll + stroke
         res += polygon.fill.r + " " + polygon.fill.g + " " + polygon.fill.b + kw.c;
-        res += geometric;
+        res += geometry;
         res += kw.cp;
         res += kw.gs + kw.f + kw.gr;
         res += polygon.stroke.r + " " + polygon.stroke.g + " " + polygon.stroke.b + kw.c;
@@ -104,9 +104,9 @@ EPS.prototype._drawPath = function (path) {
     res += kw.gs + kw.np;
     res += path.stroke.r + " " + path.stroke.g + " " + path.stroke.b + kw.c;
     res += path.strokeWidth + kw.lw + kw.f;
-    res += p.segments[0].x + " " + p.segments[0].y + kw.mt;
+    res += path.segments[0].x + " " + path.segments[0].y + kw.mt;
     for (var i=1; i<path.segments.length; i++) {
-        res += p.segments[i].x + " " + p.segments[i].y + kw.lt;
+        res += path.segments[i].x + " " + path.segments[i].y + kw.lt;
     }
     res += kw.s + kw.gr + "\n";
     return res;

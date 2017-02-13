@@ -347,8 +347,7 @@ const dl = {
         var h = svg.attr("height");
 
         // Build document
-        var eps = new EPS({width: w, height: h})
-            .author("dl version 0.1");
+        var eps = new EPS({width: w, height: h}).author("dl version 0.1");
         if (meta != null && meta != "")
             eps.author(meta);
         this._getElements(selector, "line").forEach(function(l) {
@@ -391,6 +390,39 @@ const dl = {
 
         // Write it
         var data = "data:text/EPS; charset=utf-8," + encodeURIComponent(eps.make());
+        this._download(data, filename);
+    },
+
+    pdf: function (selector, filename, meta) {
+        // Get dimensions
+        var svg = d3.select(selector);
+        var w = svg.attr("width");
+        var h = svg.attr("height");
+
+        // Build document
+        var pdf = new PDF({width: w, height: h}).author("dl version 0.1");
+        if (meta != null && meta != "")
+            pdf.author(meta);
+        this._getElements(selector, "line").forEach(function(l) {
+            pdf.line(
+                {x: l.x1, y: l.y1},
+                {x: l.x2, y: l.y2},
+                l.stroke,
+                l.strokeWidth
+            );
+        });
+        this._getElements(selector, "circle").forEach(function(n) {
+            pdf.circle(
+                {x: n.x, y: n.y},
+                n.r,
+                n.fill,
+                n.stroke,
+                n.strokeWidth
+            );
+        });
+
+        //alert(pdf.make());
+        var data = "data:text/PDF; charset=utf-8," + encodeURIComponent(pdf.make());
         this._download(data, filename);
     },
 
