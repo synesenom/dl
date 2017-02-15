@@ -9,9 +9,9 @@ function run(i) {
     DW.prototype.constructor = DW;
     var dw = new DW();
 
-    var len = dw._doc.primitives.paths.length;
+    var len = dw._doc.elements.paths.length;
     dw.path(i.corners, i.fill, i.stroke, i.strokeWidth);
-    return dw._doc.primitives.paths.length != len;
+    return dw._doc.elements.paths.length != len;
 }
 
 describe('document_writer', function() {

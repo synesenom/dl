@@ -8,7 +8,7 @@ var DocumentWriter = function() {
     this._doc = {
         header: "",
         author: "",
-        primitives: {
+        elements: {
             lines: [],
             circles: [],
             polygons: [],
@@ -123,7 +123,7 @@ DocumentWriter.prototype.line = function (src, dst, stroke, strokeWidth) {
         && dst && 'x' in dst && 'y' in dst
         && ((src.x != dst.x) || (src.y != dst.y))
         && stroke && 'r' in stroke && 'g' in stroke && 'b' in stroke) {
-        this._doc.primitives.lines.push({
+        this._doc.elements.lines.push({
             src: src,
             dst: dst,
             stroke: stroke,
@@ -154,7 +154,7 @@ DocumentWriter.prototype.circle = function (pos, radius, fill, stroke, strokeWid
         var f = (fill && 'r' in fill && 'g' in fill && 'b' in fill);
         var s = (stroke && 'r' in stroke && 'g' in stroke && 'b' in stroke && strokeWidth && strokeWidth > 0);
         if (f || s) {
-            this._doc.primitives.circles.push({
+            this._doc.elements.circles.push({
                 pos: pos,
                 radius: radius,
                 fill: f ? fill : null,
@@ -190,7 +190,7 @@ DocumentWriter.prototype.path = function(corners, fill, stroke, strokeWidth, clo
         var f = (fill && 'r' in fill && 'g' in fill && 'b' in fill);
         var s = (stroke && 'r' in stroke && 'g' in stroke && 'b' in stroke && strokeWidth && strokeWidth > 0);
         if (f || s) {
-            this._doc.primitives.paths.push({
+            this._doc.elements.paths.push({
                 corners: corners,
                 fill: f ? fill : null,
                 stroke: s ? stroke : null,

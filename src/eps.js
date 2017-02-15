@@ -104,19 +104,19 @@ EPS.prototype.make = function() {
 
     // Lines
     doc += "\n% Lines\n%\n";
-    this._doc.primitives.lines.forEach(function(l) {
+    this._doc.elements.lines.forEach(function(l) {
         doc += EPS.prototype._drawLine(l);
     });
 
     // Circles
     doc += "\n% Circles\n%\n";
-    this._doc.primitives.circles.forEach(function(c) {
+    this._doc.elements.circles.forEach(function(c) {
         doc += EPS.prototype._drawCircle(c);
     });
 
     // Paths
     doc += "\n% Paths\n%\n";
-    this._doc.primitives.paths.forEach(function(p) {
+    this._doc.elements.paths.forEach(function(p) {
         doc += EPS.prototype._drawPath(p);
     });
 

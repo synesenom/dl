@@ -9,9 +9,9 @@ function run(i) {
     DW.prototype.constructor = DW;
     var dw = new DW();
 
-    var len = dw._doc.primitives.circles.length;
+    var len = dw._doc.elements.circles.length;
     dw.circle(i.pos, i.radius, i.fill, i.stroke, i.strokeWidth);
-    return dw._doc.primitives.circles.length != len;
+    return dw._doc.elements.circles.length != len;
 }
 
 describe('document_writer', function() {

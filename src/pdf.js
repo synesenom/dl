@@ -84,10 +84,10 @@ PDF.prototype.make = function() {
     // Primitives
     // Create stream
     var draw = "";
-    this._doc.primitives.lines.forEach(function(l) {
+    this._doc.elements.lines.forEach(function(l) {
         draw += PDF.prototype._drawLine(l);
     });
-    this._doc.primitives.circles.forEach(function(c) {
+    this._doc.elements.circles.forEach(function(c) {
         draw += PDF.prototype._drawCircle(c);
     });
 
