@@ -10,13 +10,9 @@ var PDF = function(boundingBox) {
 };
 PDF.prototype = Object.create(DocumentWriter.prototype);
 PDF.prototype.constructor = PDF;
-PDF.prototype.kw = {
-    o: "obj",
-    eo: "endobj"
-};
 
 PDF.prototype._drawLine = function(line) {
-    var res = line.stroke.r + " " + line.stroke.g + " " + line.stroke.b + " rg ";
+    var res = line.stroke.r/255 + " " + line.stroke.g/255 + " " + line.stroke.b/255 + " rg ";
     res += line.src.x + " " + line.src.y + " m " + line.dst.x + " " + line.dst.y + " l s\n";
     return res;
 };
@@ -40,13 +36,13 @@ PDF.prototype._drawCircle = function(circle) {
     // Fill
     var res = "";
     if (circle.fill != null) {
-        res += circle.fill.r + " " + circle.fill.g + " " + circle.fill.b + " rg ";
+        res += circle.fill.r/255 + " " + circle.fill.g/255 + " " + circle.fill.b/255 + " rg ";
         res += geometry + "F\n";
     }
 
     // Stroke
     if (circle.stroke != null) {
-        res += circle.stroke.r + " " + circle.stroke.g + " " + circle.stroke.b + " RG ";
+        res += circle.stroke.r/255 + " " + circle.stroke.g/255 + " " + circle.stroke.b/255 + " RG ";
         res += geometry + " " + circle.strokeWidth + " w S\n";
     }
 
@@ -101,7 +97,7 @@ PDF.prototype.make = function() {
     doc += "4 0 obj\n";
     doc += "<</Length " + draw.length + ">>\n";
     doc += "stream\n";
-    doc += draw + "\n";
+    doc += draw;
     doc += "endstream\nendobj\n\n";
 
     // Add cross reference table

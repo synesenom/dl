@@ -5,8 +5,6 @@
  * @abstract
  */
 var DocumentWriter = function() {
-    this.kw = {};
-
     this._doc = {
         header: "",
         author: "",
@@ -86,6 +84,12 @@ DocumentWriter.prototype.make = function () {
 };
 
 
+/* Private methods */
+DocumentWriter.prototype._reduce = function (text) {
+    return text ? text.trim().replace(/ +/g, " ").replace(/\n /g, "\n") : "";
+};
+
+
 /* Non-abstract methods */
 /**
  * Sets author of the document.
@@ -94,7 +98,8 @@ DocumentWriter.prototype.make = function () {
  * @returns {DocumentWriter} This document writer.
  */
 DocumentWriter.prototype.author = function(author) {
-    this._doc.author = author;
+    if (author)
+        this._doc.author = author;
     return this;
 };
 
@@ -105,7 +110,7 @@ DocumentWriter.prototype.author = function(author) {
  * @param {object} src Source position, must have x and y keys.
  * @param {object} dst Destination position, must have x and y keys.
  * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
- * @param {number} strokeWidth Width of the line.
+ * @param {number} strokeWidth Width of the line. If null, it is set to 1.
  * @returns {DocumentWriter} This document writer.
  */
 DocumentWriter.prototype.line = function (src, dst, stroke, strokeWidth) {
@@ -114,20 +119,15 @@ DocumentWriter.prototype.line = function (src, dst, stroke, strokeWidth) {
     // - src is not equal to dst
     // - stroke is valid
     // - stroke width is positive
-    if (src != null
-        && dst != null
-        && ('x' in src
-        && 'y' in src)
-        && ('x' in dst
-        && 'y' in dst)
+    if (src && 'x' in src && 'y' in src
+        && dst && 'x' in dst && 'y' in dst
         && ((src.x != dst.x) || (src.y != dst.y))
-        && stroke != null
-        && strokeWidth > 0) {
+        && stroke && 'r' in stroke && 'g' in stroke && 'b' in stroke) {
         this._doc.primitives.lines.push({
             src: src,
             dst: dst,
             stroke: stroke,
-            strokeWidth: strokeWidth
+            strokeWidth: strokeWidth && strokeWidth > 0 ? strokeWidth : 1
         });
     }
     return this;
@@ -135,6 +135,7 @@ DocumentWriter.prototype.line = function (src, dst, stroke, strokeWidth) {
 
 /**
  * Adds a circle to the document.
+ * Only valid circle is stored.
  *
  * @param {object} pos Position, must have x and y keys.
  * @param {number} radius Radius of the circle.
@@ -147,77 +148,60 @@ DocumentWriter.prototype.circle = function (pos, radius, fill, stroke, strokeWid
     // Check if circle is valid:
     // - pos is valid
     // - radius is positive
-    // - it has fill or stroke
-    // - if stroke is given, stroke width is positive
-    if (pos != null
-        && 'x' in pos
-        && 'y' in pos
-        && radius > 0
-        && (fill != null || (stroke != null && strokeWidth > 0))) {
-        this._doc.primitives.circles.push({
-            pos: pos,
-            radius: radius,
-            fill: fill,
-            stroke: stroke,
-            strokeWidth: strokeWidth
-        });
-    }
-    return this;
-};
-
-/**
- * Adds a polygon to the document.
- *
- * @param {Array} corners Coordinates of the corners, elements must have x and y keys.
- * @param {object} fill Fill color, must have r, g and b keys, all values are between 0 and 1.
- * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
- * @param {number} strokeWidth Width of the stroke around the polygon.
- * @returns {DocumentWriter} This document writer.
- */
-DocumentWriter.prototype.polygon = function(corners, fill, stroke, strokeWidth) {
-    // Check if polygon is valid:
-    // - corners are valid and has at least 3 elements
-    // - it has fill or stroke
-    // - if stroke is given, stroke width is positive
-    if (corners != null
-        && corners.length > 2
-        && (fill != null || (stroke != null && strokeWidth > 0))) {
-        this._doc.primitives.polygons.push({
-            corners: corners,
-            fill: fill,
-            stroke: stroke,
-            strokeWidth: strokeWidth
-        });
+    // - either fill or stroke is valid
+    if (pos && 'x' in pos && 'y' in pos
+        && radius && radius > 0) {
+        var f = (fill && 'r' in fill && 'g' in fill && 'b' in fill);
+        var s = (stroke && 'r' in stroke && 'g' in stroke && 'b' in stroke && strokeWidth && strokeWidth > 0);
+        if (f || s) {
+            this._doc.primitives.circles.push({
+                pos: pos,
+                radius: radius,
+                fill: f ? fill : null,
+                stroke: s ? stroke : null,
+                strokeWidth: s ? strokeWidth : null
+            });
+        }
     }
     return this;
 };
 
 /**
  * Adds a path to the document.
+ * Only valid path is stored.
  *
- * @todo implement filled path
- * @param {Array} segments Coordinates of the segments, elements must have x and y keys.
+ * @param {Array} corners Coordinates of the corners, elements must have x and y keys.
  * @param {object} fill Fill color, must have r, g and b keys, all values are between 0 and 1.
  * @param {object} stroke Stroke color, must have r, g and b keys, all values are between 0 and 1.
  * @param {number} strokeWidth Width of the path stroke.
+ * @param {boolean} closed Whether the path is closed or not.
  * @returns {DocumentWriter} This document writer.
  */
-DocumentWriter.prototype.path = function(segments, fill, stroke, strokeWidth) {
+DocumentWriter.prototype.path = function(corners, fill, stroke, strokeWidth, closed) {
     // Check if path is valid:
-    // - segments are valid and have at least 2 elements
-    // - it has fill or stroke
-    // - if stroke is given, stroke width is positive
-    if (segments != null
-        && segments.length > 2
-        && (fill != null || stroke != null)
-        && (stroke == null || strokeWidth > 0)) {
-        this._doc.primitives.paths.push({
-            segments: segments,
-            fill: fill,
-            stroke: stroke,
-            strokeWidth: strokeWidth
-        });
+    // - corners are valid and have at least 2 elements
+    // - either fill or stroke is valid
+    if (corners && corners.length > 1) {
+        // check corners
+        for (var i=0; i<corners.length; i++) {
+            if (!corners[i] || !('x' in corners[i]) || !('y' in corners[i]))
+                return this;
+        }
+        var f = (fill && 'r' in fill && 'g' in fill && 'b' in fill);
+        var s = (stroke && 'r' in stroke && 'g' in stroke && 'b' in stroke && strokeWidth && strokeWidth > 0);
+        if (f || s) {
+            this._doc.primitives.paths.push({
+                corners: corners,
+                fill: f ? fill : null,
+                stroke: s ? stroke : null,
+                strokeWidth: s ? strokeWidth : null,
+                closed: closed ? closed : false
+            });
+        }
     }
     return this;
 };
 
+// Export if we have module
+if (typeof module != "undefined" && typeof module.exports == "object")
+    module.exports.DocumentWriter = DocumentWriter;

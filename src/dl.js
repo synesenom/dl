@@ -1,8 +1,7 @@
 /**
  * Class for exporting and downloading SVG graphics.
- * @todo get the original order of SVG elements and draw them in EPS following that order.
  */
-const dl = {
+var dl = {
     /**
      * Container of all temporarily created elems.
      *
@@ -80,172 +79,105 @@ const dl = {
     },
 
     /**
-     * Returns the color from a style attribute of an element.
-     * Color must be given author rgb(...) format.
+     * Recognizes color format and returns in the range [0, 255].
      *
-     * @param {string} color Style describing the color to parse.
-     * @param {number} opacity Optional opacity value to mix with the color.
-     * @return {object} An object of the parsed color in various formats.
-     * @private
+     * @param {string, null} color Color in string format.
+     * @returns {object} Color with R, G and B components if recognized, null otherwise.
      */
-    _parseColor: function (color, opacity) {
-        var c = {r: 255, g: 255, b: 255};
+    _getColor: function (color) {
+        if (color == null)
+            return null;
 
-        // Empty color: white
-        if (color === null || color == "" || color == "none") {
-            return {
-                rgbInt: null,
-                rgbFloat: null,
-                rgbHex: null
-            };
-        } else if (color[0] == "#") {
-            if (color.length == 4) {
-                c = {
-                    r: parseInt(color[1], 16),
-                    g: parseInt(color[2], 16),
-                    b: parseInt(color[3], 16)
-                };
-            } else {
-                c = {
-                    r: parseInt(color[1]+color[2], 16),
-                    g: parseInt(color[3]+color[4], 16),
-                    b: parseInt(color[5]+color[6], 16)
-                };
-            }
-        } else if (color[0] == "r") {
-            var arr = color.split("(")[1].split(")")[0].replace(/,/g, "").split(" ");
-            c = {
-                r: parseInt(arr[0]),
-                g: parseInt(arr[1]),
-                b: parseInt(arr[2])
+        // clean string
+        var c = color.replace(/\s+/g, "");
+        if (c.length == 0 || c == "")
+            return null;
+
+        // hexadecimal format
+        var r, g, b, a;
+        if (c[0] == "#") {
+            switch (c.length) {
+                case 4:
+                    return !isNaN(r = parseInt(c[1], 16))
+                    && !isNaN(g = parseInt(c[2], 16))
+                    && !isNaN(b = parseInt(c[3], 16)) ? {r: 17 * r, g: 17 * g, b: 17 * b} : null;
+                case 7:
+                    return !isNaN(r = parseInt(c[1] + c[2], 16))
+                    && !isNaN(g = parseInt(c[3] + c[4], 16))
+                    && !isNaN(b = parseInt(c[5] + c[6], 16)) ? {r: r, g: g, b: b} : null;
+                default:
+                    return null;
             }
         }
 
-        // Blend with opacity
-        if (opacity != null) {
-            c.r = parseInt(opacity*c.r + (1-opacity)*255);
-            c.g = parseInt(opacity*c.g + (1-opacity)*255);
-            c.b = parseInt(opacity*c.b + (1-opacity)*255);
+        // rgb format
+        if (c.substring(0, 3) == "rgb") {
+            var ca = c.match(/(\d+(\.\d+)?)/g);
+            switch (c[3]) {
+                case "(":
+                    return !isNaN(r = +ca[0])
+                    && !isNaN(g = +ca[1])
+                    && !isNaN(b = +ca[2]) ? {r: r, g: g, b: b} : null;
+                    break;
+                case "a":
+                    return !isNaN(r = +ca[0])
+                    && !isNaN(g = +ca[1])
+                    && !isNaN(b = +ca[2])
+                    && !isNaN(a = +ca[3]) ? {r: r, g: g, b: b, a: a} : null;
+                    break;
+                default:
+                    return null;
+            }
         }
 
-        /**
-         * Converts decimal integer to hexadecimal.
-         * @param {number} i Decimal integer to convert.
-         * @returns {string} Zero-padded string representation of hexadecimal form.
-         */
-        function toHex(i) {
-            var hex = i.toString(16);
-            return hex.length == 1 ? "0" + hex : hex;
-        }
-
-        return {
-            rgbInt: c,
-            rgbFloat: {
-                r: c.r / 255,
-                g: c.g / 255,
-                b: c.b / 255
-            },
-            rgbHex: "#" + toHex(c.r) + toHex(c.g) + toHex(c.b)
-        };
+        // unknown
+        return null;
     },
 
     /**
      * Builds an array of all elements of the specified type in the SVG.
      *
-     * @todo get horizontal and vertical path movements as well.
      * @param {string} selector Selector for the SVG.
-     * @param {string} type Type of the element (line, circle).
+     * @param {string} type Type of the element (line, circle, rect, path).
      * @returns {Array} Array of all elements found.
      * @private
      */
     _getElements: function(selector, type) {
-        function ignore(e) {
-            var fill = e.attr("fill") ? e.attr("fill") : e.style("fill");
-            var stroke = e.attr("stroke") ? e.attr("stroke") : e.style("stroke");
-            return (fill === null || fill == "none") && (stroke === null  || stroke == "none")
-        }
-
         var svg = d3.select(selector);
         var h = svg.attr("height");
-
         var elements = [];
-        switch (type) {
-            case "line":
-                svg.selectAll("line").nodes(0).forEach(function (line) {
-                    var l = d3.select(line);
-                    if (ignore(l))
-                        return;
-                    elements.push({
-                        x1: +l.attr("x1"),
-                        y1: h - l.attr("y1"),
-                        x2: +l.attr("x2"),
-                        y2: h - l.attr("y2"),
-                        stroke: dl._parseColor(l.attr("stroke") ? l.attr("stroke") : l.style("stroke"),
-                            l.style("stroke-opacity")).rgbFloat,
-                        strokeWidth: 1
-                    });
-                });
-                break;
-            case "circle":
-                svg.selectAll("circle").nodes(0).forEach(function (circle) {
-                    var c = d3.select(circle);
-                    if (ignore(c))
-                        return;
-                    elements.push({
-                        x: +c.attr("cx"),
-                        y: h - c.attr("cy"),
-                        r: +c.attr("r"),
-                        fill: dl._parseColor(c.attr("fill") ? c.attr("fill") : c.style("fill"),
-                            c.style("opacity")).rgbFloat,
-                        stroke: dl._parseColor(c.attr("stroke") ? c.attr("stroke") : c.style("stroke"),
-                            c.style("stroke-opacity")).rgbFloat,
-                        strokeWidth: +c.attr("stroke-width")
-                    });
-                });
-                break;
-            case "rect":
-                svg.selectAll("rect").nodes(0).forEach(function (rect) {
-                    var r = d3.select(rect);
-                    if (ignore(r))
-                        return;
-                    elements.push({
-                        x: +r.attr("x"),
-                        y: h - r.attr("y"),
-                        width: +r.attr("width"),
-                        height: +r.attr("height"),
-                        fill: dl._parseColor(r.attr("fill") ? r.attr("fill") : r.style("fill"),
-                            r.style("opacity")).rgbFloat,
-                        stroke: dl._parseColor(r.attr("stroke") ? r.attr("stroke") : r.style("stroke"),
-                            r.style("stroke-opacity")).rgbFloat,
-                        strokeWidth: +r.attr("stroke-width")
-                    });
-                });
-                break;
-            case "path":
-                svg.selectAll("path").nodes(0).forEach(function (path) {
-                    var p = d3.select(path);
-                    if (ignore(p))
-                        return;
-                    if (p.attr("d").indexOf("H") > -1 || p.attr("d").indexOf("V") > -1)
-                        return;
 
-                    var segments = [];
-                    p.attr("d").substring(1).split("L").forEach(function(s) {
-                        var coords = s.split(",");
-                        segments.push({x: +coords[0], y: h - coords[1]});
-                    });
-                    elements.push({
-                        segments: segments,
-                        fill: dl._parseColor(p.attr("fill") ? p.attr("fill") : p.style("fill"),
-                            p.style("opacity")).rgbFloat,
-                        stroke: dl._parseColor(p.attr("stroke") ? p.attr("stroke") : p.style("stroke"),
-                            p.style("stroke-opacity")).rgbFloat,
-                        strokeWidth: p.attr("stroke-width")
-                            ? +p.attr("stroke-width").replace("px", "") : +p.style("stroke-width").replace("px", "")
-                    });
+        svg.selectAll(type).nodes(0).forEach(function (elem) {
+            var e = d3.select(elem);
+            var segments = [];
+            if (type == "path") {
+                e.attr("d").substring(1).split("L").forEach(function (s) {
+                    var coords = s.split(",");
+                    segments.push({x: +coords[0], y: h - coords[1]});
                 });
-                break;
-        }
+            } else {
+                segments = null;
+            }
+
+            var sw = e.attr("stroke-width");
+            var nElem = {
+                x: +e.attr("x") ? +e.attr("x") : +e.attr("cx"),
+                x1: +e.attr("x1"),
+                x2: +e.attr("x2"),
+                y: +e.attr("y") ? h - e.attr("y") : h - e.attr("cy"),
+                y1: h - e.attr("y1"),
+                y2: h - e.attr("y2"),
+                r: +e.attr("r"),
+                width: +e.attr("width"),
+                height: +e.attr("height"),
+                segments: segments,
+                fill: dl._getColor(e.attr("fill") ? e.attr("fill") : e.style("fill")),
+                stroke: dl._getColor(e.attr("stroke") ? e.attr("stroke") : e.style("stroke")),
+                strokeWidth: sw != null ? sw.replace("px", "") : +e.style("stroke-width").replace("px", "")
+            };
+            if (nElem.fill != null || nElem.stroke != null)
+                elements.push(nElem);
+        });
         return elements;
     },
 
@@ -334,8 +266,6 @@ const dl = {
      * Converts an SVG element to EPS and triggers the download right away.
      * Only works for graphs
      *
-     * @todo Implement rest of SVG elems.
-     * @todo Get dimensions from <g> tags.
      * @param {string} selector Selector for the SVG element to convert.
      * @param {string} filename Name of the file to download.
      * @param {string} meta Name of the creator.
@@ -389,7 +319,7 @@ const dl = {
         });*/
 
         // Write it
-        var data = "data:text/EPS; charset=utf-8," + encodeURIComponent(eps.make());
+        var data = "data:application/postscript; charset=utf-8," + encodeURIComponent(eps.make());
         this._download(data, filename);
     },
 
@@ -422,7 +352,7 @@ const dl = {
         });
 
         //alert(pdf.make());
-        var data = "data:text/PDF; charset=utf-8," + encodeURIComponent(pdf.make());
+        var data = "data:application/pdf; charset=utf-8," + encodeURIComponent(pdf.make());
         this._download(data, filename);
     },
 
@@ -430,7 +360,6 @@ const dl = {
      * Converts an SVG element to a JSON file.
      * Only works for graphs.
      *
-     * @todo Implement further SVG elems.
      * @param {string} selector Selector for the SVG element to convert.
      * @param {string} filename Name of the file to download.
      */
@@ -471,3 +400,7 @@ const dl = {
         this._download(data, filename);
     }
 };
+
+// Export if we have module
+if (typeof module != "undefined" && typeof module.exports == "object")
+    module.exports.dl = dl;
