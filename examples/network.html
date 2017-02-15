@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <svg id="svg" width="960" height="600"></svg>
-<script src="d3/d3.v4.min.js"></script>
+<script src="../src/libs/jquery-3.1.1.min.js"></script>
+<script src="../src/libs/d3.v4.min.js"></script>
 <script>
     var graph = {
         "nodes": [
@@ -356,8 +357,7 @@
         .data(graph.links)
         .enter().append("line")
         .style("stroke", "#999")
-        .style("stroke-opacity", 0.8)
-        .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+        .style("stroke-opacity", 0.8);
 
     var node = svg.append("g")
         .attr("class", "nodes")
@@ -367,7 +367,6 @@
         .attr("r", 5)
         .attr("fill", function(d) { return Math.random() < 0.5 ? color(d.group) : "none"; })
         .attr("stroke", function(){ return Math.random() < 0.5 ? "#f00" : "none"; })
-        .attr("stroke-width", 2)
         .attr("stroke-opacity", 0.4)
         .call(d3.drag()
             .on("start", dragstarted)
@@ -427,7 +426,6 @@
 
 </script>
 <script src="../src/document_writer.js"></script>
-<script src="../src/pdfkit.js"></script>
 <script src="../src/eps.js"></script>
 <script src="../src/pdf.js"></script>
 <script src="../src/dl.js"></script>

@@ -1,3 +1,8 @@
+// Imports
+if (typeof module != "undefined") {
+    var d3 = require('../src/libs/d3.v4.min');
+}
+
 /**
  * Class for exporting and downloading SVG graphics.
  */
@@ -325,7 +330,7 @@ var dl = {
 
     pdf: function (selector, filename, meta) {
         // Get dimensions
-        var svg = d3.select(selector);
+        /*var svg = d3.select(selector);
         var w = svg.attr("width");
         var h = svg.attr("height");
 
@@ -353,7 +358,27 @@ var dl = {
 
         //alert(pdf.make());
         var data = "data:application/pdf; charset=utf-8," + encodeURIComponent(pdf.make());
-        this._download(data, filename);
+        this._download(data, filename);*/
+
+        d3.selection.prototype.children = function () {
+            return this.selectAll(function(){
+                return this.childNodes;
+            });
+        };
+        var stack = [d3.select("svg")];
+        while (stack.length > 0) {
+            var node = stack.shift();
+
+            var children = node.children();
+            if (children != null) {
+                var c = 0;
+                children.each(function() {
+                    stack.push(d3.select(this));
+                    c++;
+                });
+                console.log(c);
+            }
+        }
     },
 
     /**
