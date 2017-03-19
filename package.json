@@ -1,0 +1,7 @@
+{
+  "name": "dl",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "mocha --recursive"
+  }
+}
