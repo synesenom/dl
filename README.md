@@ -1,4 +1,4 @@
-https://travis-ci.org/synesenom/dl.svg?branch=master
+[![Build Status](https://travis-ci.org/synesenom/dl.svg?branch=master)](https://travis-ci.org/synesenom/dl)
 
 # Description
 Library for exporting SVG content from the DOM.
