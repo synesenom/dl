@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <svg id="svg" width="960" height="600"></svg>
-<script src="../src/libs/jquery-3.1.1.min.js"></script>
 <script src="../src/libs/d3.v4.min.js"></script>
 <script>
     var graph = {
@@ -366,7 +365,7 @@
         .enter().append("circle")
         .attr("r", 5)
         .attr("fill", function(d) { return Math.random() < 0.5 ? color(d.group) : "none"; })
-        .attr("stroke", function(){ return Math.random() < 0.5 ? "#f00" : "none"; })
+        .style("stroke", function(){ return Math.random() < 0.5 ? "#f00" : "none"; })
         .attr("stroke-opacity", 0.4)
         .call(d3.drag()
             .on("start", dragstarted)

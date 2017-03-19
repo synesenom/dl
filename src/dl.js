@@ -368,15 +368,14 @@ var dl = {
         var stack = [d3.select("svg")];
         while (stack.length > 0) {
             var node = stack.shift();
+            console.log(node.style("fill"));
 
             var children = node.children();
             if (children != null) {
-                var c = 0;
                 children.each(function() {
-                    stack.push(d3.select(this));
-                    c++;
+                    if (this.tagName != "title")
+                        stack.push(d3.select(this));
                 });
-                console.log(c);
             }
         }
     },
