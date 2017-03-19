@@ -106,7 +106,7 @@ const SVG = {
                         if (pen == 'v') {
                             p.y += c1;
                         } else {
-                            p.y = c1;
+                            p.y = 0;
                         }
                         piece.push({x: p.x, y: p.y});
                         break;
