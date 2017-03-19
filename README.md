@@ -1,3 +1,5 @@
+https://travis-ci.org/synesenom/dl.svg?branch=master
+
 # Description
 Library for exporting SVG content from the DOM.
 
