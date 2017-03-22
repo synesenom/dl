@@ -8,7 +8,7 @@ if (typeof module != "undefined") {
  * Class for parsing SVG elements.
  */
 const SVG = {
-    // MLVHQTCSAZ
+    // TODO: QTCSAZ
     PATH: [
         'M', 'm',
         'L', 'l',
@@ -16,12 +16,73 @@ const SVG = {
         'V', 'v'
     ],
 
-    _coord: function(e, attr) {
-        return e.attr(attr) ? e.attr(attr) : 0;
+    /**
+     * Tries to extract a number from an attribute.
+     * Both raw attribute and style content is read.
+     *
+     * @param elem Element to read number for.
+     * @param attr Attribute name.
+     * @param defaultValue Default value if attribute was not found.
+     * @returns {number} Attribute value.
+     * @private
+     */
+    // TODO unit test
+    _get_number: function(elem, attr, defaultValue) {
+        var value = elem.attr(attr) != null ? elem.attr(attr)
+            : (elem.style(attr) != null ? elem.style(attr) : defaultValue);
+        var strokeWidth = value.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/)[0];
+        if (strokeWidth.length > 0)
+            return parseFloat(strokeWidth);
+        else
+            return defaultValue;
     },
 
-    _points: function(e) {
-        var points = e.attr("points").replace(/\s+/g, " ").split(" ");
+    /**
+     * Tries to extract string from an attribute.
+     * Both raw attribute and stlye content is read.
+     *
+     * @param elem Element to read string for.
+     * @param attr Attribute name.
+     * @param defaultValue Default value if attribute was not found.
+     * @returns {string} Attribute value.
+     * @private
+     */
+    // TODO unit test
+    _get_string: function (elem, attr, defaultValue) {
+        return elem.attr(attr) != null ? elem.attr(attr)
+            : (elem.style(attr) != null ? elem.style(attr) : defaultValue);
+    },
+
+    /**
+     * Tries to extract transformations from an element.
+     *
+     * @param elem Element to read transformations for.
+     * @returns object Object containing the transformations.
+     * @private
+     */
+    // TODO unit test
+    _get_transform: function(elem) {
+        var attr = elem.attr("transform");
+        var transform = {};
+        if (attr != null && attr != "") {
+            attr.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g).forEach(function (t) {
+                var c = t.match(/[\w.\-]+/g);
+                transform[c.shift()] = c;
+            });
+        }
+        return transform;
+    },
+    
+    /**
+     * Reads multiple coordinates from a polygon or polyline.
+     *
+     * @param elem Element to read coordinates from.
+     * @returns {Array} Array of (x, y) coordinate pairs if attribute exists, empty Array otherwise.
+     * @private
+     */
+    // TODO unit test
+    _get_coordinates: function(elem) {
+        var points = elem.attr("points").replace(/\s+/g, " ").split(" ");
         var coords = [];
         if (points && points.length > 0) {
             points.forEach(function(p) {
@@ -32,9 +93,21 @@ const SVG = {
         return coords;
     },
 
-    _path: function(attr) {
+    /**
+     * Reads an SVG path from an attribute.
+     *
+     * @param elem Element to read path from.
+     * @param attr Attribute to use for the path.
+     * @returns {Array} Array containing arrays of (x, y) coordinate pairs for each part of the path.
+     * @private
+     */
+    // TODO unit test
+    _get_path: function(elem, attr) {
+        if (!elem.attr(attr) || elem.attr(attr).trim() == "")
+            return [];
+
         // Remove commas and multiple whitespace
-        var attr_clean = attr.replace(/,/g, " ").replace(/\s+/g, " ");
+        var attr_clean = elem.attr(attr).replace(/,/g, " ").replace(/\s+/g, " ");
 
         // Remove space from around commands
         this.PATH.forEach(function (c) {
@@ -116,106 +189,204 @@ const SVG = {
         return segments;
     },
 
-    _color: function(e, attr) {
-        return e.attr(attr) ? e.attr(attr) : e.style(attr);
-    },
-
-    _strokeWidth: function(e) {
-        var value = e.attr("stroke-width") != null ? e.attr("stroke-width") : e.style("stroke-width");
-        var strokeWidth = value.match(/(\d+(\.\d+)?)/g);
-        if (strokeWidth.length > 0)
-            return strokeWidth;
-        else
-            return 0;
-    },
-
     // Shapes
+    /**
+     * Reads the attributes of a circle element.
+     *
+     * @param elem Circle element.
+     * @returns object Object containing the circle attributes.
+     */
+    // TODO unit test
     circle: function(elem) {
         return {
-            cx: this._coord(elem, "cx"),
-            cy: this._coord(elem, "cy"),
-            r: this._coord(elem, "r"),
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem),
-            fill: this._color(elem, "fill")
+            cx: this._get_number(elem, "cx", 0),
+            cy: this._get_number(elem, "cy", 0),
+            r: this._get_number(elem, "r", 0),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            fill: this._get_string(elem, "stroke", null),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
+    /**
+     * Reads the attributes of an ellipse element.
+     * @param elem Ellipse element.
+     * @returns object Object containing the ellipse attributes.
+     */
+    // TODO unit test
     ellipse: function(elem) {
         return {
-            cx: this._coord(elem, "cx"),
-            cy: this._coord(elem, "cy"),
-            rx: this._coord(elem, "rx"),
-            ry: this._coord(elem, "ry"),
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem),
-            fill: this._color(elem, "fill")
+            cx: this._get_number(elem, "cx", 0),
+            cy: this._get_number(elem, "cy", 0),
+            rx: this._get_number(elem, "rx", 0),
+            ry: this._get_number(elem, "ry", 0),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            fill: this._get_string(elem, "stroke", null),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
+    /**
+     * Reads the attributes of a line element.
+     * @param elem Line element.
+     * @returns object Object containing the line attributes.
+     */
+    // TODO unit test
     line: function(elem) {
         return {
-            x1: this._coord(elem, "x1"),
-            y1: this._coord(elem, "y1"),
-            x2: this._coord(elem, "x2"),
-            y2: this._coord(elem, "y2"),
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem)
+            x1: this._get_number(elem, "x1", 0),
+            y1: this._get_number(elem, "y1", 0),
+            x2: this._get_number(elem, "x2", 0),
+            y2: this._get_number(elem, "y2", 0),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
+    /**
+     * Reads the attributes of a path element.
+     * @param elem Path element.
+     * @returns object Object containing the path attributes.
+     */
+    // TODO unit test
     path: function(elem) {
         return {
-            points: 0,
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem),
-            fill: this._color(elem, "fill")
+            points: this._get_path(elem, "d"),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            fill: this._get_string(elem, "stroke", null),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
+    /**
+     * Reads the attributes of a polygon element.
+     * @param elem Polygon element.
+     * @returns object Object containing the polygon attributes.
+     */
+    // TODO unit test
     polygon: function (elem) {
         return {
-            points: this._points(elem),
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem),
-            fill: this._color(elem, "fill")
+            points: this._get_coordinates(elem),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            fill: this._get_string(elem, "stroke", null),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
+    /**
+     * Reads the attributes of a polyline element.
+     * @param elem Polyline element.
+     * @returns object Object containing the polyline attributes.
+     */
+    // TODO unit test
     polyline: function (elem) {
         return {
-            points: this._points(elem),
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem)
+            points: this._get_coordinates(elem),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
+    /**
+     * Reads the attributes of a rect element.
+     * @param elem Rect element.
+     * @returns object Object containing the rect attributes.
+     */
+    // TODO unit test
     rect: function(elem) {
         return {
-            x: this._coord(elem, "x"),
-            y: this._coord(elem, "y"),
-            width: this._coord(elem, "width"),
-            height: this._coord(elem, "height"),
-            rx: this._coord(elem, "rx"),
-            ry: this._coord(elem, "ry"),
-            stroke: this._color(elem, "stroke"),
-            strokeWidth: this._strokeWidth(elem),
-            fill: this._color(elem, "fill")
+            x: this._get_number(elem, "x", 0),
+            y: this._get_number(elem, "y", 0),
+            width: this._get_number(elem, "width", 1),
+            height: this._get_number(elem, "height", 1),
+            rx: this._get_number(elem, "rx", 0),
+            ry: this._get_number(elem, "ry", 0),
+            stroke: this._get_string(elem, "stroke", null),
+            strokeWidth: this._get_number(elem, "stroke-width", 1),
+            fill: this._get_string(elem, "stroke", null),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
-    g: function(elem) {
-
+    /**
+     * Reads the attributes of a text element.
+     *
+     * @param elem Text element.
+     * @returns object Object containing the text attributes.
+     */
+    // TODO unit test
+    text: function (elem) {
+        return {
+            x: this._get_number(elem, "x", 0),
+            y: this._get_number(elem, "y", 0),
+            textAnchor: this._get_string(elem, "text-anchor", null),
+            fontFamily: this._get_string(elem, "font-family", null),
+            fontSize: this._get_number(elem, "font-size", 10),
+            fill: this._get_string(elem, "fill", null)
+        };
     },
 
+    /**
+     * Reads the attributes of a group element.
+     *
+     * @param elem Group element.
+     * @returns object Object containing the group attributes.
+     */
+    // TODO unit test
+    g: function(elem) {
+        return {
+            opacity: this._get_number(elem, "opacity", null)
+        };
+    },
+
+    /**
+     * Reads the attributes of an SVG element.
+     *
+     * @param elem SVG element.
+     * @returns object Object containing the SVG attributes.
+     */
+    // TODO unit test
+    svg: function(elem) {
+        return {
+            width: this._get_number(elem, "width", null),
+            height: this._get_number(elem, "height", null),
+            backgroundColor: this._get_string(elem, "background-color", "white")
+        };
+    },
+
+    // TODO unit test
     children: function (elem) {
         return elem.selectAll(function(){ return this.childNodes; });
     },
 
     // TODO traverse the whole svg and parse
     // TODO if <g> found, use it's attributes to the children
+    // TODO unit test
     parse: function(selector) {
+        var svgTree = {};
 
+        // Init element stack
+        var stack = [d3.select(selector)];
+        while (stack.length > 0) {
+            // Next element
+            var node = stack.shift();
+            console.log(node);
+
+            // Get children
+            var children = this.children(node);
+            if (children != null) {
+                children.each(function() {
+                    if (this.tagName != "title")
+                        stack.push(d3.select(this));
+                });
+            }
+        }
     }
 };
 
