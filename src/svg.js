@@ -26,15 +26,18 @@ const SVG = {
      * @returns {number} Attribute value.
      * @private
      */
-    // TODO unit test
     _get_number: function(elem, attr, defaultValue) {
         var value = elem.attr(attr) != null ? elem.attr(attr)
             : (elem.style(attr) != null ? elem.style(attr) : defaultValue);
-        var strokeWidth = value.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/)[0];
-        if (strokeWidth.length > 0)
-            return parseFloat(strokeWidth);
-        else
+        if (value == null || value == "")
             return defaultValue;
+        else {
+            var strokeWidth = value.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/)[0];
+            if (strokeWidth.length > 0)
+                return parseFloat(strokeWidth);
+            else
+                return defaultValue;
+        }
     },
 
     /**
@@ -101,8 +104,8 @@ const SVG = {
      * @returns {Array} Array containing arrays of (x, y) coordinate pairs for each part of the path.
      * @private
      */
-    // TODO unit test
     _get_path: function(elem, attr) {
+        //console.log(elem.attr("d"));
         if (!elem.attr(attr) || elem.attr(attr).trim() == "")
             return [];
 
@@ -328,7 +331,8 @@ const SVG = {
             textAnchor: this._get_string(elem, "text-anchor", null),
             fontFamily: this._get_string(elem, "font-family", null),
             fontSize: this._get_number(elem, "font-size", 10),
-            fill: this._get_string(elem, "fill", null)
+            fill: this._get_string(elem, "fill", null),
+            opacity: this._get_number(elem, "opacity", null)
         };
     },
 
