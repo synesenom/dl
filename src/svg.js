@@ -27,22 +27,20 @@ const SVG = {
      * @private
      */
     _get_number: function(elem, attr, defaultValue) {
-        var value = elem.attr(attr) != null ? elem.attr(attr)
-            : (elem.style(attr) != null ? elem.style(attr) : defaultValue);
-        if (value == null || value == "")
+        // Get string content
+        var a = elem.attr(attr);
+        var s = elem.style(attr);
+        var str = (a != null && a != "") ? a : ((s != null && s != "") ? s : "");
+        if (str == "")
             return defaultValue;
-        else {
-            var strokeWidth = value.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/)[0];
-            if (strokeWidth.length > 0)
-                return parseFloat(strokeWidth);
-            else
-                return defaultValue;
-        }
+
+        // Extract number
+        return parseFloat(str.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/)[0]);
     },
 
     /**
      * Tries to extract string from an attribute.
-     * Both raw attribute and stlye content is read.
+     * Both raw attribute and style content is read.
      *
      * @param elem Element to read string for.
      * @param attr Attribute name.
@@ -50,10 +48,10 @@ const SVG = {
      * @returns {string} Attribute value.
      * @private
      */
-    // TODO unit test
     _get_string: function (elem, attr, defaultValue) {
-        return elem.attr(attr) != null ? elem.attr(attr)
-            : (elem.style(attr) != null ? elem.style(attr) : defaultValue);
+        var a = elem.attr(attr);
+        var s = elem.style(attr);
+        return (a != null && a != "") ? a : ((s != null && s != "") ? s : defaultValue);
     },
 
     /**

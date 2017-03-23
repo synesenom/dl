@@ -14,6 +14,7 @@ function run(i) {
     return dw._doc.elements.lines.length != len;
 }
 
+// TODO simplify it
 describe('document_writer', function() {
     describe('line', function() {
         it('should add line only if line is valid', function() {

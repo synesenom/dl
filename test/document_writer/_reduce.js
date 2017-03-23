@@ -1,26 +1,28 @@
 var assert = require('assert');
 var test = require('../../src/document_writer');
 
-function run(i) {
-    var DW = function() {
-        test.DocumentWriter.apply(this, arguments);
-    };
-    DW.prototype = Object.create(test.DocumentWriter.prototype);
-    DW.prototype.constructor = DW;
-    var dw = new DW();
-
-    return dw._reduce(i);
-}
+var testCases = [
+    {i: undefined, o: ""},
+    {i: null, o: ""},
+    {i: "", o: ""},
+    {i: "a b c d", o: "a b c d"},
+    {i: "a   b   c  d", o: "a b c d"},
+    {i: "a \n b \n   c  d", o: "a \nb \nc d"},
+];
 
 describe('document_writer', function() {
     describe('_reduce', function() {
         it('remove multiple spaces', function() {
-            assert.equal("", run(undefined));
-            assert.equal("", run(null));
-            assert.equal("", run(""));
-            assert.equal("a b c d", run("a b c d"));
-            assert.equal("a b c d", run("a   b   c  d"));
-            assert.equal("a \nb \nc d", run("a \n b \n   c  d"));
+            var DW = function() {
+                test.DocumentWriter.apply(this, arguments);
+            };
+            DW.prototype = Object.create(test.DocumentWriter.prototype);
+            DW.prototype.constructor = DW;
+            var dw = new DW();
+
+            testCases.forEach(function (t) {
+                assert.equal(dw._reduce(t.i), t.o);
+            });
         });
     });
 });

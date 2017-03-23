@@ -14,6 +14,7 @@ function run(i) {
     return dw._doc.elements.circles.length != len;
 }
 
+// TODO simplify it
 describe('document_writer', function() {
     describe('circle', function() {
         it('should add circle only if circle is valid', function() {

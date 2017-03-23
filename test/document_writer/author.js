@@ -1,29 +1,30 @@
 var assert = require('assert');
 var test = require('../../src/document_writer');
 
-function run(i) {
-    var DW = function() {
-        test.DocumentWriter.apply(this, arguments);
-    };
-    DW.prototype = Object.create(test.DocumentWriter.prototype);
-    DW.prototype.constructor = DW;
-    var dw = new DW();
-
-    var author = dw._doc.author;
-    dw.author(i);
-    return dw._doc.author != author;
-}
+var testCases = [
+    {i: "", o: false},
+    {i: null, o: false},
+    {i: undefined, o: false},
+    {i: "some author", o: true}
+];
 
 describe('document_writer', function() {
     describe('author', function() {
         it('set author if valid', function() {
-            // valid
-            assert.equal(true, run("some author"));
+            var DW = function() {
+                test.DocumentWriter.apply(this, arguments);
+            };
+            DW.prototype = Object.create(test.DocumentWriter.prototype);
+            DW.prototype.constructor = DW;
+            var dw = new DW();
 
-            // invalid
-            assert.equal(false, run(""));
-            assert.equal(false, run(null));
-            assert.equal(false, run(undefined));
+            testCases.forEach(function (t) {
+                assert.equal((function(x) {
+                    var author = dw._doc.author;
+                    dw.author(x);
+                    return dw._doc.author != author;
+                })(t.i), t.o);
+            })
         });
     });
 });

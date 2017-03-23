@@ -4,7 +4,7 @@ const d3 = require('../../src/libs/d3.v4.min');
 require('../init').init();
 
 
-var tags = ["circle", "ellipse", "line", "path", "polygon", "polyline", "rect"];
+var tags = ["circle", "ellipse", "line", "path", "polygon", "polyline", "rect", "text"];
 var attributes = {
     circle: ["cx", "cy", "r", "stroke-width"],
     ellipse: ["cx", "cy", "rx", "ry", "stroke-width"],
@@ -25,39 +25,57 @@ var styles = {
     rect: ["stroke-width", "opacity"],
     text: ["font-size", "opacity"]
 };
-
-function generate() {
-    var t = tags[Math.floor(Math.random() * tags.length)];
-    var a = attributes[t][Math.floor(Math.random() * attributes[t].length)];
-    var s = styles[t][Math.floor(Math.random() * styles[t].length)];
-    var v = Math.random()*200 - 100;
-    var vs = "" + v;
-    if (a != "opacity")
-        vs += "px";
-    var elem = d3.select("svg").append(t);
-    if (Math.random() < 0.5) {
-        if (Math.random() < 0.5)
-            elem.attr(a, vs);
-    } else {
-        if (Math.random() < 0.5)
-            elem.style(s, vs);
-    }
-    return {expected: v, i: {elem: elem, attr: a}};
-}
-
-function run(elem, attr, dv) {
-    return test.SVG._get_number(elem, attr, dv);
-}
+var values = {
+    cx: [-1.2, 0],
+    cy: [-1.2, 0],
+    x: [-1.2, 0],
+    x1: [-1.2, 0],
+    x2: [-1.2, 0],
+    y: [-1.2, 0],
+    y1: [-1.2, 0],
+    y2: [-1.2, 0],
+    r: [10.2],
+    rx: [10.2],
+    ry: [10.2],
+    width: [10.2],
+    height: [10.2],
+    "stroke-width": [10.2],
+    opacity: [0.3, 0],
+    "font-size": [10]
+};
 
 describe('svg', function() {
     describe('_get_number', function() {
         it('should parse number from attribute', function() {
             this.timeout(5000);
-            for (var k=0; k<100; k++) {
-                var res = generate();
-                assert.deepEqual(res.expected, run(res.i.elem, res.i.attr, res.expected));
-                d3.select("svg").html("");
-            }
+            tags.forEach(function(t) {
+                attributes[t].forEach(function(a) {
+                    values[a].forEach(function(v) {
+                        // valid attribute
+                        var e1 = d3.select("svg").append(t);
+                        e1.attr(a, v);
+                        assert.deepEqual(test.SVG._get_number(e1, a, null), v);
+
+                        // empty attribute
+                        var e2 = d3.select("svg").append(t);
+                        assert.deepEqual(test.SVG._get_number(e2, a, 2*v), 2*v);
+                    });
+                });
+
+                styles[t].forEach(function(a) {
+                    values[a].forEach(function(v) {
+                        // valid attribute
+                        var e1 = d3.select("svg").append(t);
+                        e1.style(a, a == "font-size" ? v + "px" : v);
+                        assert.deepEqual(test.SVG._get_number(e1, a, null), v);
+
+                        // empty attribute
+                        var e2 = d3.select("svg").append(t);
+                        assert.deepEqual(test.SVG._get_number(e2, a, 2*v), 2*v);
+                    });
+                });
+            });
+            d3.select("svg").html("");
         });
     });
 });

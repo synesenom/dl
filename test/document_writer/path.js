@@ -14,6 +14,7 @@ function run(i) {
     return dw._doc.elements.paths.length != len;
 }
 
+// TODO simplify it
 describe('document_writer', function() {
     describe('path', function() {
         it('should add path only if path is valid', function() {

@@ -75,6 +75,7 @@ function run(d) {
     return test.SVG._get_path(d3.select("path"), "d");
 }
 
+// TODO simplify code
 describe('svg', function() {
     describe('_get_path', function() {
         it('should parse SVG path d attribute', function() {
