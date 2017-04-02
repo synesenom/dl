@@ -16,6 +16,12 @@ const SVG = {
         'V', 'v'
     ],
 
+    // TODO unit test
+    // TODO documentation
+    _multiply: function(mat1, mat2) {
+
+    },
+
     /**
      * Tries to extract a number from an attribute.
      * Both raw attribute and style content is read.
@@ -62,8 +68,9 @@ const SVG = {
      * @private
      */
     // TODO unit test
+    // TODO create matrix
     _get_transform: function(elem) {
-        var attr = elem.attr("transform");
+        var attr = elem.attr("transform").replace(/,/g, " ");
         var transform = {};
         if (attr != null && attr != "") {
             attr.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g).forEach(function (t) {
