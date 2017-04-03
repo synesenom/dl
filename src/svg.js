@@ -17,9 +17,39 @@ const SVG = {
     ],
 
     // TODO unit test
-    // TODO documentation
-    _multiply: function(mat1, mat2) {
+    /**
+     * Multiplies two transformation matrices.
+     *
+     * @param l Left matrix.
+     * @param r Right matrix
+     * @returns {Array} Array representing the result transformation.
+     * @private
+     */
+    _multiply: function(l, r) {
+        return [
+            l[0]*r[0] + l[2]*r[1],
+            l[1]*r[0] + l[3]*r[1],
+            l[0]*r[2] + l[2]*r[3],
+            l[1]*r[2] + l[3]*r[3],
+            l[0]*r[4] + l[2]*r[5] + l[4],
+            l[1]*r[4] + l[3]*r[5] + l[5]
+        ];
+    },
 
+    /**
+     * Transforms a pair of coordinates using a transformation matrix.
+     *
+     * @param c Coordinates to transform.
+     * @param m Matrix representing the transformation.
+     * @returns {Array} Array containing the new coordinates.
+     * @private
+     */
+    // TODO unit test
+    _transform: function(c, m) {
+        return [
+            m[0]*c[0] + m[2]*c[1] + m[4],
+            m[1]*c[0] + m[3]*c[1] + m[5]
+        ]
     },
 
     /**
@@ -69,14 +99,67 @@ const SVG = {
      */
     // TODO unit test
     // TODO create matrix
+    // TODO transformation order!
     _get_transform: function(elem) {
-        var attr = elem.attr("transform").replace(/,/g, " ");
-        var transform = {};
-        if (attr != null && attr != "") {
+        // Collect transformations
+        var attr = elem.attr("transform").trim().replace(/ /g, ",");
+        var transforms = [];
+        if (attr !== null && attr !== "") {
             attr.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g).forEach(function (t) {
                 var c = t.match(/[\w.\-]+/g);
-                transform[c.shift()] = c;
+                transforms.push(c);
             });
+        }
+        return transforms;
+
+        // Build matrices
+        var matrices = [];
+        transforms.forEach(function(t) {
+            switch (t.shift()) {
+                case "matrix":
+                    if (t.length == 6)
+                        matrices.push([t[0], t[2], t[4], t[1], t[3], t[5]]);
+                    else
+                        matrices.push([1, 0, 0, 1, 0, 0]);
+                    break;
+                case "translate":
+                    if (t.length == 1)
+                        matrices.push([1, 0, 0, 1, t[0], 0]);
+                    else if (t.length == 2)
+                        matrices.push([1, 0, 0, 1, t[0], t[1]]);
+                    else
+                        matrices.push([1, 0, 0, 1, 0, 0]);
+                    break;
+                case "scale":
+                    if (t.length == 1)
+                        matrices.push([t[0], 0, 0, t[0], 0, 0]);
+                    else if (t.length == 2)
+                        matrices.push([t[0], 0, 0, t[1], 0, 0]);
+                    else
+                        matrices.push([1, 0, 0, 1, 0, 0]);
+                    break;
+                case "rotate":
+                    var rot = [Math.cos(t[0]), Math.sin(t[0]), -Math.sin(t[0]), Math.cos(t[0]), 0, 0];
+                    if (t.length == 3) {
+                        var t1 = [1, 0, 0, 1, t[1], t[2]];
+                        var t2 = [1, 0, 0, 1, -t[1], -t[2]];
+                        rot = this._multiply(t1, this._multiply(rot, t2));
+                    }
+                    matrices.push(rot);
+                    break;
+                case "skewX":
+                    matrices.push([1, 0, Math.tan(t[0]), 1, 0, 0]);
+                    break;
+                case "skewY":
+                    matrices.push([1, Math.tan(t[0]), 0, 1, 0, 0]);
+                    break;
+            }
+        });
+
+        // Multiply transformations
+        var transform = [1, 0, 0, 1, 0, 0];
+        for (var i=0; i<matrices.length; i++) {
+            transform = this._multiply(transform, matrices[i]);
         }
         return transform;
     },

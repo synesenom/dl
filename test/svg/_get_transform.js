@@ -21,33 +21,47 @@ var parameters = {
 };
 
 function generate() {
-    var transform = "";
+    var output = [];
+    var input = "";
     for (var i=0; i<transforms.length; i++) {
-        var t = transforms[i];
-        var p = Math.floor(Math.random() * (parameters[t].max-parameters[t].min)) + parameters[t].min;
-        transform += transforms[i] + "(";
-        transform += Math.random()*20 - 10;
-        for (var j=1; j<p; j++) {
-            transform += Math.random() < 0.5 ? "," : " ";
+        if (Math.random() < 0.5) {
+            // Transformation
+            var t = transforms[i];
+            input += t + "(";
+            output.push([t]);
+
+            // First value
+            var v = Math.random()*20 - 10;
+            input += v;
+            output[output.length-1].push(v);
+
+            // Rest of the values
+            var p = Math.floor(Math.random() * (parameters[t].max-parameters[t].min)) + parameters[t].min;
+            for (var j=1; j<p; j++) {
+                input += Math.random() < 0.5 ? "," : " ";
+                v = Math.random()*20 - 10;
+                input += v;
+                output[output.length-1].push(v);
+            }
+            input += ") ";
         }
-        transform += ") ";
     }
+
     return {
-        i: transform,
-        o: null
+        i: input,
+        o: output
     };
 }
 
 describe('svg', function() {
     describe('_get_transform', function() {
         it('should parse SVG transform attribute', function() {
-            for (var n=0; n<10; n++) {
+            for (var n=0; n<1000; n++) {
                 var res = generate();
                 d3.select("svg").html("");
                 d3.select("svg").append("g")
                     .attr("transform", res.i);
-                //assert.deepEqual(test.SVG._get_path(d3.select("path"), "d"),
-                //    res.expected);
+                assert.deepEqual(test.SVG._get_transform(d3.select("g")), res.o);
             }
         });
     });
