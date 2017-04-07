@@ -16,7 +16,6 @@ const SVG = {
         'V', 'v'
     ],
 
-    // TODO unit test
     /**
      * Multiplies two transformation matrices.
      *
@@ -39,17 +38,16 @@ const SVG = {
     /**
      * Transforms a pair of coordinates using a transformation matrix.
      *
-     * @param c Coordinates to transform.
      * @param m Matrix representing the transformation.
+     * @param c Coordinates to transform.
      * @returns {Array} Array containing the new coordinates.
      * @private
      */
-    // TODO unit test
-    _transform: function(c, m) {
+    _transform: function(m, c) {
         return [
             m[0]*c[0] + m[2]*c[1] + m[4],
             m[1]*c[0] + m[3]*c[1] + m[5]
-        ]
+        ];
     },
 
     /**

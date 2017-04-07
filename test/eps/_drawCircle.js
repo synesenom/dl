@@ -13,7 +13,7 @@ var testCases = [
 ];
 
 describe('eps', function() {
-    describe('_drawCircle.get', function() {
+    describe('_drawCircle', function() {
         it('draws a valid postscript circle command', function() {
             var eps = new test.EPS({width: 10, height: 10});
 

@@ -29,7 +29,7 @@ var testCases = [
 ];
 
 describe('eps', function() {
-    describe('_drawPath.get', function() {
+    describe('_drawPath', function() {
         it('draws a valid postscript path command', function() {
             var eps = new test.EPS({width: 10, height: 10});
 

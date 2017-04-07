@@ -7,7 +7,7 @@ var testCases = [
 ];
 
 describe('eps', function() {
-    describe('_drawLine.get', function() {
+    describe('_drawLine', function() {
         it('draws a valid postscript line command', function() {
             var eps = new test.EPS({width: 10, height: 10});
 
