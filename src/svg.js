@@ -164,17 +164,18 @@ const SVG = {
      * @returns {Array} Array of (x, y) coordinate pairs if attribute exists, empty Array otherwise.
      * @private
      */
-    // TODO unit test
-    _get_coordinates: function(elem) {
-        var points = elem.attr("points").replace(/\s+/g, " ").split(" ");
-        var coords = [];
-        if (points && points.length > 0) {
-            points.forEach(function(p) {
-                var c = p.split(",");
-                coords.push({x: +c[0], y: +c[1]});
-            });
+    _get_points: function(elem) {
+        var coordinates = elem.attr("points")
+            .replace(/\s+/g, " ")
+            .replace(/,/g, " ")
+            .split(" ");
+        var points = [];
+        if (coordinates && coordinates.length > 0) {
+            for (var i=0; i<coordinates.length; i+=2) {
+                points.push({x: +coordinates[i], y: +coordinates[i+1]});
+            }
         }
-        return coords;
+        return points;
     },
 
     /**
@@ -184,6 +185,8 @@ const SVG = {
      * @param attr Attribute to use for the path.
      * @returns {Array} Array containing arrays of (x, y) coordinate pairs for each part of the path.
      * @private
+     *
+     * TODO simplify this method
      */
     _get_path: function(elem, attr) {
         //console.log(elem.attr("d"));
@@ -354,7 +357,7 @@ const SVG = {
     // TODO unit test
     polygon: function (elem) {
         return {
-            points: this._get_coordinates(elem),
+            points: this._get_points(elem),
             stroke: this._get_string(elem, "stroke", null),
             strokeWidth: this._get_number(elem, "stroke-width", 1),
             fill: this._get_string(elem, "stroke", null),
@@ -370,7 +373,7 @@ const SVG = {
     // TODO unit test
     polyline: function (elem) {
         return {
-            points: this._get_coordinates(elem),
+            points: this._get_points(elem),
             stroke: this._get_string(elem, "stroke", null),
             strokeWidth: this._get_number(elem, "stroke-width", 1),
             opacity: this._get_number(elem, "opacity", null)

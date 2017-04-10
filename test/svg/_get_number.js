@@ -4,6 +4,7 @@ const d3 = require('../../src/libs/d3.v4.min');
 require('../init').init();
 
 
+// TODO make this unit test more realistic (much more values and formats!)
 var tags = ["circle", "ellipse", "line", "path", "polygon", "polyline", "rect", "text"];
 var attributes = {
     circle: ["cx", "cy", "r", "stroke-width"],
@@ -47,7 +48,6 @@ var values = {
 describe('svg', function() {
     describe('_get_number', function() {
         it('should parse number from attribute', function() {
-            this.timeout(5000);
             tags.forEach(function(t) {
                 attributes[t].forEach(function(a) {
                     values[a].forEach(function(v) {
