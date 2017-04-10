@@ -12,40 +12,100 @@ var transforms = [
     "skewY"
 ];
 var parameters = {
-    matrix: {min: 6, max: 6},
-    translate: {min: 1, max: 2},
-    scale: {min: 1, max: 2},
-    rotate: {min:1, max: 3},
-    skewX: {min: 1, max: 1},
-    skewY: {min: 1, max: 1}
+    matrix: [6],
+    translate: [1, 2],
+    scale: [1, 2],
+    rotate: [1, 3],
+    skewX: [1],
+    skewY: [1]
 };
 
+function mm(x, y) {
+    return [
+        x[0]*y[0]+x[1]*y[3]+x[2]*y[6],
+        x[0]*y[1]+x[1]*y[4]+x[2]*y[7],
+        x[0]*y[2]+x[1]*y[5]+x[2]*y[8],
+        x[3]*y[0]+x[4]*y[3]+x[5]*y[6],
+        x[3]*y[1]+x[4]*y[4]+x[5]*y[7],
+        x[3]*y[2]+x[4]*y[5]+x[5]*y[8],
+        x[6]*y[0]+x[7]*y[3]+x[8]*y[6],
+        x[6]*y[1]+x[7]*y[4]+x[8]*y[7],
+        x[6]*y[2]+x[7]*y[5]+x[8]*y[8]
+    ];
+}
+
 function generate() {
-    var output = [];
+    var output = [1, 0, 0, 0, 1, 0, 0, 0, 1];
     var input = "";
-    for (var i=0; i<transforms.length; i++) {
+    for (var i=0; i<6; i++) {
         if (Math.random() < 0.5) {
+            var mi = [];
+
             // Transformation
             var t = transforms[i];
             input += t + "(";
-            output.push([t]);
 
             // First value
             var v = Math.random()*20 - 10;
             input += v;
-            output[output.length-1].push(v);
+            mi.push(v);
 
             // Rest of the values
-            var p = Math.floor(Math.random() * (parameters[t].max-parameters[t].min)) + parameters[t].min;
+            var p = parameters[t][Math.floor(Math.random() * parameters[t].length)];
             for (var j=1; j<p; j++) {
                 input += Math.random() < 0.5 ? "," : " ";
                 v = Math.random()*20 - 10;
                 input += v;
-                output[output.length-1].push(v);
+                mi.push(v);
             }
             input += ") ";
+
+            // Build matrix and multiply output
+            var m = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+            switch (t) {
+                case "matrix":
+                    m = [mi[0], mi[2], mi[4], mi[1], mi[3], mi[5], 0, 0, 1];
+                    break;
+                case "translate":
+                    m = [1, 0, mi[0], 0, 1, 0, 0, 0, 1];
+                    if (mi.length == 2)
+                        m[5] = mi[1];
+                    break;
+                case "scale":
+                    m = [mi[0], 0, 0, 0, mi[0], 0, 0, 0, 1];
+                    if (mi.length == 2)
+                        m[4] = mi[1];
+                    break;
+                case "rotate":
+                    m = [Math.cos(mi[0]), -Math.sin(mi[0]), 0, Math.sin(mi[0]), Math.cos(mi[0]), 0, 0, 0, 1];
+                    if (mi.length == 3) {
+                        var tl = [1, 0, mi[1], 0, 1, mi[2], 0, 0, 1];
+                        var tr = [1, 0, -mi[1], 0, 1, -mi[2], 0, 0, 1];
+                        m = mm(tl, mm(m, tr));
+                    }
+                    break;
+                case "skewX":
+                    m = [1, Math.tan(mi[0]), 0, 0, 1, 0, 0, 0, 1];
+                    break;
+                case "skewY":
+                    m = [1, 0, 0, Math.tan(mi[0]), 1, 0, 0, 0, 1];
+                    break;
+                default:
+                    m = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+            }
+
+            // Update output
+            output = mm(output, m);
         }
     }
+    output = [
+        output[0],
+        output[3],
+        output[1],
+        output[4],
+        output[2],
+        output[5]
+    ];
 
     return {
         i: input,

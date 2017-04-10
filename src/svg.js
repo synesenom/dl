@@ -95,9 +95,6 @@ const SVG = {
      * @returns object Object containing the transformations.
      * @private
      */
-    // TODO unit test
-    // TODO create matrix
-    // TODO transformation order!
     _get_transform: function(elem) {
         // Collect transformations
         var attr = elem.attr("transform").trim().replace(/ /g, ",");
@@ -105,10 +102,13 @@ const SVG = {
         if (attr !== null && attr !== "") {
             attr.match(/(\w+\((-?\d+\.?\d*e?-?\d*,?)+\))+/g).forEach(function (t) {
                 var c = t.match(/[\w.\-]+/g);
-                transforms.push(c);
+                var transform = [c.shift()];
+                c.forEach(function(ci) {
+                    transform.push(+ci);
+                });
+                transforms.push(transform);
             });
         }
-        return transforms;
 
         // Build matrices
         var matrices = [];
@@ -116,7 +116,7 @@ const SVG = {
             switch (t.shift()) {
                 case "matrix":
                     if (t.length == 6)
-                        matrices.push([t[0], t[2], t[4], t[1], t[3], t[5]]);
+                        matrices.push([t[0], t[1], t[2], t[3], t[4], t[5]]);
                     else
                         matrices.push([1, 0, 0, 1, 0, 0]);
                     break;
@@ -139,9 +139,9 @@ const SVG = {
                 case "rotate":
                     var rot = [Math.cos(t[0]), Math.sin(t[0]), -Math.sin(t[0]), Math.cos(t[0]), 0, 0];
                     if (t.length == 3) {
-                        var t1 = [1, 0, 0, 1, t[1], t[2]];
-                        var t2 = [1, 0, 0, 1, -t[1], -t[2]];
-                        rot = this._multiply(t1, this._multiply(rot, t2));
+                        var tl = [1, 0, 0, 1, t[1], t[2]];
+                        var tr = [1, 0, 0, 1, -t[1], -t[2]];
+                        rot = SVG._multiply(tl, SVG._multiply(rot, tr));
                     }
                     matrices.push(rot);
                     break;
@@ -151,6 +151,8 @@ const SVG = {
                 case "skewY":
                     matrices.push([1, Math.tan(t[0]), 0, 1, 0, 0]);
                     break;
+                default:
+                    matrices.push([1, 0, 0, 1, 0, 0]);
             }
         });
 
