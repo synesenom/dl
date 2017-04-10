@@ -66,7 +66,7 @@ describe('svg', function() {
                     values[a].forEach(function(v) {
                         // valid attribute
                         var e1 = d3.select("svg").append(t);
-                        e1.style(a, a == "font-size" ? v + "px" : v);
+                        e1.style(a, a != "opacity" ? v + "px" : v);
                         assert.deepEqual(test.SVG._get_number(e1, a, null), v);
 
                         // empty attribute

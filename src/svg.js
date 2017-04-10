@@ -51,28 +51,6 @@ const SVG = {
     },
 
     /**
-     * Tries to extract a number from an attribute.
-     * Both raw attribute and style content is read.
-     *
-     * @param elem Element to read number for.
-     * @param attr Attribute name.
-     * @param defaultValue Default value if attribute was not found.
-     * @returns {number} Attribute value.
-     * @private
-     */
-    _get_number: function(elem, attr, defaultValue) {
-        // Get string content
-        var a = elem.attr(attr);
-        var s = elem.style(attr);
-        var str = (a != null && a != "") ? a : ((s != null && s != "") ? s : "");
-        if (str == "")
-            return defaultValue;
-
-        // Extract number
-        return parseFloat(str.match(/-?(?:\d+(?:\.\d*)?|\.\d+)/)[0]);
-    },
-
-    /**
      * Tries to extract string from an attribute.
      * Both raw attribute and style content is read.
      *
@@ -85,7 +63,22 @@ const SVG = {
     _get_string: function (elem, attr, defaultValue) {
         var a = elem.attr(attr);
         var s = elem.style(attr);
-        return (a != null && a != "") ? a : ((s != null && s != "") ? s : defaultValue);
+        return (a != null && a != "") ? a
+            : ((s != null && s != "") ? s : defaultValue);
+    },
+
+    /**
+     * Tries to extract a number from an attribute.
+     * Both raw attribute and style content is read.
+     *
+     * @param elem Element to read number for.
+     * @param attr Attribute name.
+     * @param defaultValue Default value if attribute was not found.
+     * @returns {number} Attribute value.
+     * @private
+     */
+    _get_number: function(elem, attr, defaultValue) {
+        return parseFloat(this._get_string(elem, attr, defaultValue));
     },
 
     /**
