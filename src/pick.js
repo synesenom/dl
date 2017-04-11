@@ -1,10 +1,10 @@
 /**
- * Class for generating random attributes and style.
+ * Class for generating various random entities.
  *
  * References:
  * https://developer.mozilla.org/en-US/docs/Web/SVG/Content_type
  */
-const draw = {
+const pick = {
     /**
      * Core functionality.
      * The core random generator and basic uniform generators.
@@ -154,7 +154,7 @@ const draw = {
          */
         integer: function() {
             // FIXME Should be between -2147483648 and 2147483647
-            return (draw.core.char("+- ") + draw.core.int(10)).trim();
+            return (pick.core.char("+- ") + pick.core.int(10)).trim();
         },
 
         /**
@@ -165,13 +165,13 @@ const draw = {
         number: function() {
             if (Math.random() < 0.5) {
                 return this.integer()
-                    + (Math.random() < 0.5 ? draw.core.char("Ee") + this.integer() : "");
+                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "");
             } else {
-                return (draw.core.char(" +-")
-                    + (Math.random() < 0.5 ? draw.core.int(100) : "")
+                return (pick.core.char(" +-")
+                    + (Math.random() < 0.5 ? pick.core.int(100) : "")
                     + "."
-                    + draw.core.int(100)
-                    + (Math.random() < 0.5 ? draw.core.char("Ee") + this.integer() : "")).trim();
+                    + pick.core.int(100)
+                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "")).trim();
             }
         },
 
@@ -182,7 +182,7 @@ const draw = {
          * @returns {string} Random length.
          */
         length: function(positive) {
-            var length = this.number() + draw.core.choice(["em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
+            var length = this.number() + pick.core.choice(["em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
             return (positive && length.charAt(0) == "-") ? length.replace("-", "") : length;
         },
 
@@ -234,4 +234,4 @@ const draw = {
 
 // Export if we have module
 if (typeof module != "undefined" && typeof module.exports == "object")
-    module.exports = draw;
+    module.exports = pick;

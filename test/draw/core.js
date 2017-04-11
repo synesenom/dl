@@ -1,5 +1,5 @@
 var assert = require('assert');
-const draw = require('../../src/draw');
+const pick = require('../../src/pick');
 
 var LAPS = 1000;
 function add(dist, value) {
@@ -9,7 +9,7 @@ function add(dist, value) {
         dist[value]++;
 }
 
-describe('draw', function() {
+describe('pick', function() {
     describe('core', function() {
         describe('_r(min, max)', function () {
             it('should return a random value uniformly distributed in (min, max)', function () {
@@ -18,7 +18,7 @@ describe('draw', function() {
                     var min = Math.random() * 50 - 100;
                     var max = Math.random() * 50 - 100;
                     for (var lap = 0; lap < LAPS; lap++) {
-                        var r = draw.core._r(min, max);
+                        var r = pick.core._r(min, max);
                         add(freqs, Math.floor(r));
                         // Value is in range
                         assert.equal(true, (min < max ? min : max) <= r && r <= (min < max ? max : min));
@@ -37,7 +37,7 @@ describe('draw', function() {
                     var values = ['a', 'b', 'c', 2, 4, null, undefined];
                     var freqs = {};
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core._choice(values);
+                        var r = pick.core._choice(values);
                         add(freqs, r);
                         // Value is in array
                         assert.equal(true, values.indexOf(r) > -1);
@@ -56,7 +56,7 @@ describe('draw', function() {
                     var string = "abcdefghijkl51313#^!#?><;!-_=+.,/:{}()";
                     var freqs = {};
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core._char(string);
+                        var r = pick.core._char(string);
                         add(freqs, r);
                         // Character is in string
                         assert.equal(true, string.indexOf(r) > -1);
@@ -76,7 +76,7 @@ describe('draw', function() {
                     var min = Math.random() * 50 - 100;
                     var max = Math.random() * 50 - 100;
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.float(min, max);
+                        var r = pick.core.float(min, max);
                         add(freqs, Math.floor(r));
                         // Value is in range
                         assert.equal(true, (min<max ? min : max) <= r && r <= (min<max ? max : min));
@@ -95,7 +95,7 @@ describe('draw', function() {
                     var freqs = {};
                     var max = Math.random() * 50 - 100;
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.float(max);
+                        var r = pick.core.float(max);
                         add(freqs, Math.floor(r));
                         // Value is in range
                         assert.equal(true, (0<max ? 0 : max) <= r && r <= (0<max ? max : 0));
@@ -113,7 +113,7 @@ describe('draw', function() {
                 for (var trial=0; trial<50; trial++) {
                     var freqs = {};
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.float();
+                        var r = pick.core.float();
                         add(freqs, Math.floor(r*100));
                         // Value is in range
                         assert.equal(true, 0 <= r && r <= 1);
@@ -133,7 +133,7 @@ describe('draw', function() {
                     var min = Math.floor(Math.random() * 50 - 100);
                     var max = Math.floor(Math.random() * 50 - 100);
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.int(min, max);
+                        var r = pick.core.int(min, max);
                         add(freqs, r);
                         // Value is in range
                         assert.equal(true, (min<max ? min : max) <= r && r <= (min<max ? max : min));
@@ -155,7 +155,7 @@ describe('draw', function() {
                     var freqs = {};
                     var max = Math.floor(Math.random() * 50 - 100);
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.int(max);
+                        var r = pick.core.int(max);
                         add(freqs, r);
                         // Value is in range
                         assert.equal(true, (0<max ? 0 : max) <= r && r <= (0<max ? max : 0));
@@ -176,7 +176,7 @@ describe('draw', function() {
                     var freqs = {};
                     var k = Math.floor(Math.random()*100 - 200);
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.choice(values, k);
+                        var r = pick.core.choice(values, k);
                         if (k < 2)
                             r = [r];
                         r.forEach(function (ri) {
@@ -201,7 +201,7 @@ describe('draw', function() {
                     var values = ['a', 'b', 'c', 2, 4, null, undefined];
                     var freqs = {};
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.choice(values);
+                        var r = pick.core.choice(values);
                         add(freqs, r);
                         // Character is in string
                         assert.equal(true, values.indexOf(r) > -1);
@@ -221,7 +221,7 @@ describe('draw', function() {
                     var freqs = {};
                     var k = Math.floor(Math.random()*100 - 200);
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.char(string, k);
+                        var r = pick.core.char(string, k);
                         if (k < 2)
                             r = [r];
                         r.forEach(function (ri) {
@@ -246,7 +246,7 @@ describe('draw', function() {
                     var string = "abcdefghijkl51313#^!#?><;!-_=+.,/:{}()";
                     var freqs = {};
                     for (var lap=0; lap<LAPS; lap++) {
-                        var r = draw.core.char(string);
+                        var r = pick.core.char(string);
                         add(freqs, r);
                         // Character is in string
                         assert.equal(true, string.indexOf(r) > -1);

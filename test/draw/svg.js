@@ -1,14 +1,14 @@
 var assert = require('assert');
-const draw = require('../../src/draw');
+const pick = require('../../src/pick');
 
 var LAPS = 10000;
 
-describe('draw', function() {
+describe('pick', function() {
     describe('svg', function() {
         describe('integer()', function () {
             it('should return a random content of type integer', function () {
                 for (var lap = 0; lap < LAPS; lap++) {
-                    assert.equal(true, /^[+-]?[0-9]+$/.test(draw.svg.integer()));
+                    assert.equal(true, /^[+-]?[0-9]+$/.test(pick.svg.integer()));
                 }
             });
         });
@@ -16,7 +16,7 @@ describe('draw', function() {
         describe('number()', function () {
             it('should return a random content of type number', function () {
                 for (var lap = 0; lap < LAPS; lap++) {
-                    assert.equal(true, /^[+-]?[0-9]*\.?[0-9]+([Ee][+-]?[0-9]+)?$/.test(draw.svg.number()));
+                    assert.equal(true, /^[+-]?[0-9]*\.?[0-9]+([Ee][+-]?[0-9]+)?$/.test(pick.svg.number()));
                 }
             });
         });
@@ -26,7 +26,7 @@ describe('draw', function() {
                 for (var lap = 0; lap < LAPS; lap++) {
                     assert.equal(true,
                         /^[+-]?[0-9]*\.?[0-9]+([Ee][+-]?[0-9]+)?(em|ex|px|in|cm|mm|pt|pc|%)?$/.test(
-                            draw.svg.length(Math.random() < 0.5)
+                            pick.svg.length(Math.random() < 0.5)
                         ));
                 }
             });
@@ -37,7 +37,7 @@ describe('draw', function() {
                 for (var lap = 0; lap < LAPS; lap++) {
                     assert.equal(true,
                         /^[+-]?[0-9]*\.?[0-9]+([Ee][+-]?[0-9]+)?(em|ex|px|in|cm|mm|pt|pc|%)?$/.test(
-                            draw.svg.coordinate()
+                            pick.svg.coordinate()
                         ));
                 }
             });
