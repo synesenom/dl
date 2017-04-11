@@ -4,6 +4,7 @@ if (typeof module != "undefined") {
 }
 
 
+// TODO check if attributes are valid, return error if not
 /**
  * Class for parsing SVG elements.
  */
@@ -276,7 +277,6 @@ const SVG = {
         return segments;
     },
 
-    // Shapes
     /**
      * Reads the attributes of a circle element.
      *

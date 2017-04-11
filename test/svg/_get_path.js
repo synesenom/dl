@@ -71,7 +71,7 @@ function generate() {
 describe('svg', function() {
     describe('_get_path', function() {
         it('should parse SVG path d attribute', function() {
-            for (var n=0; n<10; n++) {
+            for (var n=0; n<100; n++) {
                 var res = generate();
                 d3.select("svg").html("");
                 d3.select("svg").append("path")

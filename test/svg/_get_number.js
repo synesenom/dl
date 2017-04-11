@@ -4,7 +4,6 @@ const d3 = require('../../src/libs/d3.v4.min');
 require('../init').init();
 
 
-// TODO make this unit test more realistic (much more values and formats!)
 var tags = ["circle", "ellipse", "line", "path", "polygon", "polyline", "rect", "text"];
 var attributes = {
     circle: ["cx", "cy", "r", "stroke-width"],
@@ -48,33 +47,35 @@ var values = {
 describe('svg', function() {
     describe('_get_number', function() {
         it('should parse number from attribute', function() {
-            tags.forEach(function(t) {
-                attributes[t].forEach(function(a) {
-                    values[a].forEach(function(v) {
-                        // valid attribute
-                        var e1 = d3.select("svg").append(t);
-                        e1.attr(a, v);
-                        assert.deepEqual(test.SVG._get_number(e1, a, null), v);
-
-                        // empty attribute
-                        var e2 = d3.select("svg").append(t);
-                        assert.deepEqual(test.SVG._get_number(e2, a, 2*v), 2*v);
-                    });
-                });
-
-                styles[t].forEach(function(a) {
-                    values[a].forEach(function(v) {
-                        // valid attribute
-                        var e1 = d3.select("svg").append(t);
-                        e1.style(a, a != "opacity" ? v + "px" : v);
-                        assert.deepEqual(test.SVG._get_number(e1, a, null), v);
-
-                        // empty attribute
-                        var e2 = d3.select("svg").append(t);
-                        assert.deepEqual(test.SVG._get_number(e2, a, 2*v), 2*v);
-                    });
-                });
-            });
+            for (var i=0; i<100; i++) {
+                var t = tags[Math.floor(Math.random()*tags.length)];
+                var e = d3.select("svg").append(t);
+                var v = Math.random() < 0.1 ? 0 : Math.random()*10;
+                if (Math.random() < 0.333) {
+                    var a = attributes[t][Math.floor(Math.random()*attributes[t].length)];
+                    if (a != "r" && a != "rx" && a != "ry"
+                        && a != "width" && a != "height"
+                        && a != "stroke-width"
+                        && a != "opacity" && a != "font-size")
+                        v = (Math.random() < 0.5 ? -v : v);
+                    e.attr(a, v);
+                    assert.deepEqual(test.SVG._get_number(e, a, null), v);
+                } else if (Math.random() < 0.5) {
+                    var a = styles[t][Math.floor(Math.random()*styles[t].length)];
+                    if (a != "r" && a != "rx" && a != "ry"
+                        && a != "width" && a != "height"
+                        && a != "stroke-width"
+                        && a != "opacity" && a != "font-size")
+                        v = (Math.random() < 0.5 ? -v : v);
+                    e.style(a, v + (a != "opacity" ? "px" : ""));
+                    assert.deepEqual(test.SVG._get_number(e, a, null), v);
+                } else {
+                    v = Math.random()*10 - 20;
+                    assert.deepEqual(
+                        test.SVG._get_number(e, attributes[t][Math.floor(Math.random()*attributes[t].length)], v),
+                        v);
+                }
+            }
             d3.select("svg").html("");
         });
     });
