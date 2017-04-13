@@ -93,6 +93,7 @@ const pick = {
          * Selects a random element from an array.
          *
          * @param values Array of values.
+         * @param k Number of characters to sample.
          * @returns {object} Random element if k is not given or less than 2, an array of random elements otherwise.
          */
         choice: function(values, k) {
@@ -132,23 +133,7 @@ const pick = {
      */
     css: {
         /**
-         * Returns a <number> content type:
-         * integer | [+-]? [0-9]* "." [0-9]+
-         *
-         * @returns {number} Intensity value.
-         */
-        // TODO unit test
-        number: function() {
-            return this.float();
-        }
-    },
-
-    /**
-     * Generators of SVG related entities.
-     */
-    svg: {
-        /**
-         * Returns a random <integer> content type.
+         * Returns a random CSS <integer>.
          *
          * @returns {string} Random integer.
          */
@@ -158,25 +143,24 @@ const pick = {
         },
 
         /**
-         * Returns a random <number> content type:
+         * Returns a random CSS <number>.
          *
          * @returns {string} Random number.
          */
         number: function() {
-            if (Math.random() < 0.5) {
-                return this.integer()
-                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "");
+            if (Math.random() < 1/2) {
+                return "" + this.integer();
             } else {
-                return (pick.core.char(" +-")
+                return (pick.core.char("+- ")
                     + (Math.random() < 0.5 ? pick.core.int(100) : "")
                     + "."
                     + pick.core.int(100)
-                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "")).trim();
+                ).trim();
             }
         },
 
         /**
-         * Returns a random <length> content type.
+         * Returns a random CSS <length>.
          *
          * @param positive Whether to generate strictly positive length.
          * @returns {string} Random length.
@@ -187,7 +171,96 @@ const pick = {
         },
 
         /**
-         * Returns a random <coordinate> content type.
+         * Returns a random CSS <color> content type.
+         *
+         * @returns {string} Random color.
+         */
+        color: function() {
+            if (Math.random() < 1/7)
+                return "#" + pick.core.char("0123456789abcdef", 3).join("");
+            if (Math.random() < 1/6)
+                return "#" + pick.core.char("0123456789abcdef", 6).join("");
+            if (Math.random() < 1/5)
+                return pick.core.choice(["red", "green", "blue"]);
+            if (Math.random() < 1/4)
+                return "rgb(" + pick.core.int(255)
+                    + "," + pick.core.int(255)
+                    + "," + pick.core.int(255)
+                    + ")";
+            if (Math.random() < 1/3)
+                return "rgb(" + pick.core.int(255)
+                    + "," + pick.core.int(255)
+                    + "," + pick.core.int(255)
+                    + "," + pick.core.float()
+                    + ")";
+            if (Math.random() < 1/2)
+                return "rgb(" + pick.core.int(100)
+                    + "%," + pick.core.int(100)
+                    + "%," + pick.core.int(100)
+                    + "%)";
+            else
+                return "rgb(" + pick.core.int(100)
+                    + "%," + pick.core.int(100)
+                    + "%," + pick.core.int(100)
+                    + "%," + pick.core.float()
+                    + ")";
+        },
+
+        /**
+         * Returns a random CSS <opacity-values>.
+         *
+         * @returns {string} Random opacity-value.
+         */
+        opacityValue: function() {
+            return "" + pick.core.float();
+        }
+    },
+
+    /**
+     * Generators of SVG related entities.
+     */
+    svg: {
+        /**
+         * Returns a random SVG <integer>.
+         *
+         * @returns {string} Random integer.
+         */
+        integer: function() {
+            return pick.css.integer();
+        },
+
+        /**
+         * Returns a random SVG <number>.
+         *
+         * @returns {string} Random number.
+         */
+        number: function() {
+            if (Math.random() < 0.5) {
+                return this.integer()
+                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "");
+            } else {
+                return (pick.core.char("+- ")
+                    + (Math.random() < 0.5 ? pick.core.int(100) : "")
+                    + "."
+                    + pick.core.int(100)
+                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "")
+                ).trim();
+            }
+        },
+
+        /**
+         * Returns a random SVG <length>.
+         *
+         * @param positive Whether to generate strictly positive length.
+         * @returns {string} Random length.
+         */
+        length: function(positive) {
+            var length = this.number() + pick.core.choice(["", "em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
+            return (positive && length.charAt(0) == "-") ? length.replace("-", "") : length;
+        },
+
+        /**
+         * Returns a random SVG <coordinate>.
          *
          * @returns {string} Random coordinate.
          */
@@ -195,19 +268,22 @@ const pick = {
             return this.length();
         },
 
-        // TODO unit test
+        /**
+         * Returns a random SVG <color>.
+         *
+         * @returns {string} Random color.
+         */
         color: function() {
-            if (Math.random() < 0.333) {
-                return "rgb(" + this.int(255) + "," + this.int(255) + "," + this.int(255) + ")";
-            } else if (Math.random() < 0.5)
-                return "rgba(" + this.int(255) + "," + this.int(255) + "," + this.int(255) + "," + this.float(1.0) + ")";
-            else
-                return "#" + Math.floor(Math.random()*16777215).toString(16);
+            return pick.css.color();
         },
 
-        // TODO unit test
+        /**
+         * Returns a random SVG <opacity-values>.
+         *
+         * @returns {string} Random opacity-value.
+         */
         opacityValue: function() {
-
+            return pick.css.opacityValue();
         },
 
         // TODO unit test
@@ -228,7 +304,7 @@ const pick = {
         // TODO unit test
         listOfT: function(t) {
 
-        },
+        }
     }
 };
 
