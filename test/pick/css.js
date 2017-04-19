@@ -1,5 +1,5 @@
 var assert = require("assert");
-const css = require("../../src/pick").css;
+var css = require("../../src/pick").css;
 
 var LAPS = 10000;
 

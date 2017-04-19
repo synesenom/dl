@@ -1,75 +1,69 @@
 /**
  * Class for generating various random entities.
- *
- * References:
- * https://developer.mozilla.org/en-US/docs/Web/SVG/Content_type
  */
-const pick = {
+(function (global, factory) {
+    if (typeof exports === "object" && typeof module !== "undefined") {
+        // Common JS
+        factory(exports);
+    } else if (typeof define === 'function' && define.amd) {
+        // AMD
+        define(['exports'], factory);
+    } else {
+        // Browser
+        factory((global.pick = global.pick || {}));
+    }
+} (this, (function (exports) { "use strict";
     /**
-     * Core functionality.
-     * The core random generator and basic uniform generators.
+     * The main random number generator.
+     * If min > max, a random number in (max, min) is generated.
+     *
+     * @param {number} min Lower boundary.
+     * @param {number} max Upper boundary.
+     * @returns {number} Random number in (min, max) if min < max, otherwise a random number in (max, min).
+     * @private
      */
-    core: {
-        /**
-         * The main random number generator.
-         * If min > max, a random number in (max, min) is generated.
-         *
-         * @param min Lower boundary.
-         * @param max Upper boundary.
-         * @returns {number} Random number in (min, max) if min < max, otherwise a random number in (max, min).
-         * @private
-         */
-        _r: function(min, max) {
-            if (min >= max)
-                return Math.random()*(min-max) + max;
-            return Math.random()*(max-min) + min;
-        },
+    function r(min, max) {
+        if (min >= max)
+            return Math.random()*(min-max) + max;
+        return Math.random()*(max-min) + min;
+    }
 
-        /**
-         * Selects a random element from an array.
-         *
-         * @param values Array of values.
-         * @returns {object} Random element if array has any, null pointer otherwise.
-         * @private
-         */
-        _choice: function(values) {
-            if (values.length == 0)
-                return null;
-            return values[Math.floor(Math.random() * values.length)];
-        },
+    /**
+     * Selects a random element from an array.
+     *
+     * @param {Array} values Array of values.
+     * @returns {object} Random element if array has any, null pointer otherwise.
+     * @private
+     */
+    function choice(values) {
+        if (values.length == 0)
+            return null;
+        return values[Math.floor(Math.random() * values.length)];
+    }
 
-        /**
-         * Selects a random character of a string.
-         *
-         * @param string String to select character from.
-         * @returns {string} Random character if string is noy empty, empty string otherwise.
-         * @private
-         */
-        _char: function(string) {
-            if (string.length == 0)
-                return "";
-            return string.charAt(Math.floor(Math.random() * string.length));
-        },
-
+    /**
+     * Core functionality, basic uniform generators.
+     */
+    var core = {
         /**
          * Generates a random float in (min, max).
          * If min > max, a random number in (max, min) is generated.
          * If max is not given, a random number in (0, min) is generated.
          * If no arguments are given, returns a random float in (0, 1).
          *
-         * @param min Lower boundary, or upper if max is not given.
-         * @param max Upper boundary.
+         * @param {number=} min Lower boundary, or upper if max is not given.
+         * @param {number=} max Upper boundary.
          * @returns {number} Random float in (min, max) if min < max, otherwise a random float in (max, min). If max
          * is not specified, random float in (0, min) if min > 0, otherwise in (min, 0). If none is specified, a random
          * float in (0, 1).
          */
         float: function (min, max) {
             if (arguments.length == 0)
-                return this._r(0, 1);
+                return r(0, 1);
             if (arguments.length == 1)
-                return this._r(0, min);
+                return r(0, min);
             else
-                return this._r(min, max);
+                return r(min, max);
         },
 
         /**
@@ -77,8 +71,8 @@ const pick = {
          * If min > max, a random number in (max, min) is generated.
          * If max is not given, a random number in (0, min) is generated.
          *
-         * @param min Lower boundary, or upper if max is not given.
-         * @param max Upper boundary.
+         * @param {number} min Lower boundary, or upper if max is not given.
+         * @param {number=} max Upper boundary.
          * @returns {number} Random integer in (min, max) if min < max, otherwise a random integer in (max, min). If max
          * is not specified, random integer in (0, min) if min > 0, otherwise in (min, 0).
          */
@@ -92,17 +86,17 @@ const pick = {
         /**
          * Selects a random element from an array.
          *
-         * @param values Array of values.
-         * @param k Number of characters to sample.
+         * @param {Array} values Array of values.
+         * @param {number=} k Number of characters to sample.
          * @returns {object} Random element if k is not given or less than 2, an array of random elements otherwise.
          */
         choice: function(values, k) {
             if (arguments.length == 1 || k === null || k === undefined || k < 2)
-                return this._choice(values);
+                return choice(values);
             else {
                 var elems = [];
                 for (var i=0; i<k; i++) {
-                    elems.push(this._choice(values));
+                    elems.push(choice(values));
                 }
                 return elems;
             }
@@ -111,27 +105,28 @@ const pick = {
         /**
          * Samples some random characters of a string.
          *
-         * @param string String to select character from.
-         * @param k Number of characters to sample.
+         * @param {string} string String to select character from.
+         * @param {number=} k Number of characters to sample.
          * @returns {object} Random character if k is not given or less than 2, an array of random characters otherwise.
          */
         char: function(string, k) {
+            var charsArray = string.split("");
             if (arguments.length == 1 || k === null || k === undefined || k < 2)
-                return this._char(string);
+                return choice(charsArray);
             else {
                 var chars = [];
                 for (var i=0; i<k; i++) {
-                    chars.push(this._char(string));
+                    chars.push(choice(charsArray));
                 }
                 return chars;
             }
         }
-    },
+    };
 
     /**
      * Generators of CSS related entities.
      */
-    css: {
+    var css = {
         /**
          * Returns a random CSS <integer>.
          *
@@ -139,7 +134,7 @@ const pick = {
          */
         integer: function() {
             // FIXME Should be between -2147483648 and 2147483647
-            return (pick.core.char("+- ") + pick.core.int(10)).trim();
+            return (core.char("+- ") + core.int(10)).trim();
         },
 
         /**
@@ -151,10 +146,10 @@ const pick = {
             if (Math.random() < 1/2) {
                 return "" + this.integer();
             } else {
-                return (pick.core.char("+- ")
-                    + (Math.random() < 0.5 ? pick.core.int(100) : "")
+                return (core.char("+- ")
+                    + (Math.random() < 0.5 ? core.int(100) : "")
                     + "."
-                    + pick.core.int(100)
+                    + core.int(100)
                 ).trim();
             }
         },
@@ -162,11 +157,11 @@ const pick = {
         /**
          * Returns a random CSS <length>.
          *
-         * @param positive Whether to generate strictly positive length.
+         * @param {boolean=} positive Whether to generate strictly positive length.
          * @returns {string} Random length.
          */
         length: function(positive) {
-            var length = this.number() + pick.core.choice(["em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
+            var length = this.number() + core.choice(["em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
             return (positive && length.charAt(0) == "-") ? length.replace("-", "") : length;
         },
 
@@ -177,32 +172,32 @@ const pick = {
          */
         color: function() {
             if (Math.random() < 1/7)
-                return "#" + pick.core.char("0123456789abcdef", 3).join("");
+                return "#" + core.char("0123456789abcdef", 3).join("");
             if (Math.random() < 1/6)
-                return "#" + pick.core.char("0123456789abcdef", 6).join("");
+                return "#" + core.char("0123456789abcdef", 6).join("");
             if (Math.random() < 1/5)
-                return pick.core.choice(["red", "green", "blue"]);
+                return core.choice(["red", "green", "blue"]);
             if (Math.random() < 1/4)
-                return "rgb(" + pick.core.int(255)
-                    + "," + pick.core.int(255)
-                    + "," + pick.core.int(255)
+                return "rgb(" + core.int(255)
+                    + "," + core.int(255)
+                    + "," + core.int(255)
                     + ")";
             if (Math.random() < 1/3)
-                return "rgb(" + pick.core.int(255)
-                    + "," + pick.core.int(255)
-                    + "," + pick.core.int(255)
-                    + "," + pick.core.float()
+                return "rgb(" + core.int(255)
+                    + "," + core.int(255)
+                    + "," + core.int(255)
+                    + "," + core.float()
                     + ")";
             if (Math.random() < 1/2)
-                return "rgb(" + pick.core.int(100)
-                    + "%," + pick.core.int(100)
-                    + "%," + pick.core.int(100)
+                return "rgb(" + core.int(100)
+                    + "%," + core.int(100)
+                    + "%," + core.int(100)
                     + "%)";
             else
-                return "rgb(" + pick.core.int(100)
-                    + "%," + pick.core.int(100)
-                    + "%," + pick.core.int(100)
-                    + "%," + pick.core.float()
+                return "rgb(" + core.int(100)
+                    + "%," + core.int(100)
+                    + "%," + core.int(100)
+                    + "%," + core.float()
                     + ")";
         },
 
@@ -212,21 +207,21 @@ const pick = {
          * @returns {string} Random opacity-value.
          */
         opacityValue: function() {
-            return "" + pick.core.float();
+            return "" + core.float();
         }
-    },
+    };
 
     /**
      * Generators of SVG related entities.
      */
-    svg: {
+    var svg = {
         /**
          * Returns a random SVG <integer>.
          *
          * @returns {string} Random integer.
          */
         integer: function() {
-            return pick.css.integer();
+            return css.integer();
         },
 
         /**
@@ -237,13 +232,13 @@ const pick = {
         number: function() {
             if (Math.random() < 0.5) {
                 return this.integer()
-                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "");
+                    + (Math.random() < 0.5 ? core.char("Ee") + this.integer() : "");
             } else {
-                return (pick.core.char("+- ")
-                    + (Math.random() < 0.5 ? pick.core.int(100) : "")
+                return (core.char("+- ")
+                    + (Math.random() < 0.5 ? core.int(100) : "")
                     + "."
-                    + pick.core.int(100)
-                    + (Math.random() < 0.5 ? pick.core.char("Ee") + this.integer() : "")
+                    + core.int(100)
+                    + (Math.random() < 0.5 ? core.char("Ee") + this.integer() : "")
                 ).trim();
             }
         },
@@ -255,7 +250,7 @@ const pick = {
          * @returns {string} Random length.
          */
         length: function(positive) {
-            var length = this.number() + pick.core.choice(["", "em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
+            var length = this.number() + core.choice(["", "em", "ex", "px", "in", "cm", "mm", "pt", "pc", "%"]);
             return (positive && length.charAt(0) == "-") ? length.replace("-", "") : length;
         },
 
@@ -274,7 +269,7 @@ const pick = {
          * @returns {string} Random color.
          */
         color: function() {
-            return pick.css.color();
+            return css.color();
         },
 
         /**
@@ -283,7 +278,7 @@ const pick = {
          * @returns {string} Random opacity-value.
          */
         opacityValue: function() {
-            return pick.css.opacityValue();
+            return css.opacityValue();
         },
 
         // TODO unit test
@@ -305,9 +300,9 @@ const pick = {
         listOfT: function(t) {
 
         }
-    }
-};
+    };
 
-// Export if we have module
-if (typeof module != "undefined" && typeof module.exports == "object")
-    module.exports = pick;
+    exports.core = core;
+    exports.css = css;
+    exports.svg = svg;
+})));

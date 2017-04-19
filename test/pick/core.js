@@ -1,5 +1,5 @@
 var assert = require('assert');
-const core = require('../../src/pick').core;
+var core = require('../../src/pick').core;
 
 var LAPS = 1000;
 function add(dist, value) {
@@ -11,64 +11,6 @@ function add(dist, value) {
 
 describe('pick', function() {
     describe('core', function() {
-        describe('_r(min, max)', function () {
-            it('should return a random value uniformly distributed in (min, max)', function () {
-                for (var trial = 0; trial < 100; trial++) {
-                    var freqs = {};
-                    var min = Math.random() * 50 - 100;
-                    var max = Math.random() * 50 - 100;
-                    for (var lap = 0; lap < LAPS; lap++) {
-                        var r = core._r(min, max);
-                        add(freqs, Math.floor(r));
-                        // Value is in range
-                        assert.equal(true, (min < max ? min : max) <= r && r <= (min < max ? max : min));
-                    }
-                    for (var i in freqs) {
-                        // Distribution is uniform
-                        assert.equal(true, freqs[i] > 0);
-                    }
-                }
-            });
-        });
-
-        describe('_choice(values)', function() {
-            it('should return a random element of an array', function() {
-                for (var trial=0; trial<100; trial++) {
-                    var values = ['a', 'b', 'c', 2, 4, null, undefined];
-                    var freqs = {};
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core._choice(values);
-                        add(freqs, r);
-                        // Value is in array
-                        assert.equal(true, values.indexOf(r) > -1);
-                    }
-                    for (var i in freqs) {
-                        // Distribution is uniform
-                        assert.equal(true, freqs[i] > 0);
-                    }
-                }
-            });
-        });
-
-        describe('_char(string)', function() {
-            it('should return a random character of a string', function() {
-                for (var trial=0; trial<100; trial++) {
-                    var string = "abcdefghijkl51313#^!#?><;!-_=+.,/:{}()";
-                    var freqs = {};
-                    for (var lap=0; lap<LAPS; lap++) {
-                        var r = core._char(string);
-                        add(freqs, r);
-                        // Character is in string
-                        assert.equal(true, string.indexOf(r) > -1);
-                    }
-                    for (var i in freqs) {
-                        // Distribution is uniform
-                        assert.equal(true, freqs[i] > 0);
-                    }
-                }
-            });
-        });
-
         describe('float(min, max)', function() {
             it('should return a float uniformly distributed in (min, max)', function() {
                 for (var trial=0; trial<50; trial++) {

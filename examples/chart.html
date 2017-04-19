@@ -6,7 +6,12 @@
 <script src="../src/eps.js"></script>
 <script src="../src/pdf.js"></script>
 <script src="../src/dl.js"></script>
+<script src="../src/pick.js"></script>
 <button onclick="dl.png('svg', 'test.png', null)">png</button>
 <button onclick="dl.eps('svg', 'test.eps', 'dl version 0.1')">eps</button>
 <button onclick="dl.pdf('svg', 'test.pdf', 'dl version 0.1')">pdf</button>
 <button onclick="dl.json('svg', 'test.json')">json</button>
+<script>
+    console.log(pick.core.float());
+    console.log(pick.core.int(100));
+</script>
