@@ -25,24 +25,6 @@ var styles = {
     rect: ["stroke-width", "opacity"],
     text: ["font-size", "opacity"]
 };
-var values = {
-    cx: [-1.2, 0],
-    cy: [-1.2, 0],
-    x: [-1.2, 0],
-    x1: [-1.2, 0],
-    x2: [-1.2, 0],
-    y: [-1.2, 0],
-    y1: [-1.2, 0],
-    y2: [-1.2, 0],
-    r: [10.2],
-    rx: [10.2],
-    ry: [10.2],
-    width: [10.2],
-    height: [10.2],
-    "stroke-width": [10.2],
-    opacity: [0.3, 0],
-    "font-size": [10]
-};
 
 describe('svg', function() {
     describe('_get_number', function() {
@@ -70,7 +52,7 @@ describe('svg', function() {
                     e.style(a, v + (a != "opacity" ? "px" : ""));
                     assert.deepEqual(test.SVG._get_number(e, a, null), v);
                 } else {
-                    v = Math.random()*10 - 20;
+                    v = Math.random()*20 - 10;
                     assert.deepEqual(
                         test.SVG._get_number(e, attributes[t][Math.floor(Math.random()*attributes[t].length)], v),
                         v);
