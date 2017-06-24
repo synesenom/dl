@@ -8,8 +8,6 @@ exports.init = function() {
         global.window = global.document.parentWindow;
     }
 
-
-
     // Clear SVG
     d3.select("svg").html("");
 };

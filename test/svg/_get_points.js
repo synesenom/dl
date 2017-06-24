@@ -4,14 +4,14 @@ const d3 = require('../../src/libs/d3.v4.min');
 require('../init').init();
 
 function generate() {
-    var c1 = Math.random()*10-20;
-    var c2 = Math.random()*10-20;
+    var c1 = Math.random()*20 - 10;
+    var c2 = Math.random()*20 - 10;
     var input = c1 + " " + c2;
     var output = [{x: c1, y: c2}];
     var length = Math.floor(Math.random()*100);
     for (var i=0; i<length; i++) {
-        c1 = Math.random()*10-20;
-        c2 = Math.random()*10-20;
+        c1 = Math.random()*20 - 10;
+        c2 = Math.random()*20 - 10;
         input += (Math.random() < 0.5 ? "," : " ") + c1;
         input += (Math.random() < 0.5 ? "," : " ") + c2;
         output.push({x: c1, y: c2});
